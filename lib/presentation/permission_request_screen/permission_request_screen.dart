@@ -97,7 +97,7 @@ class _PermissionRequestScreenState extends State<PermissionRequestScreen> {
         border: Border(
           bottom: BorderSide(
             color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+                AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
             width: 1,
           ),
         ),
@@ -184,7 +184,7 @@ class _PermissionRequestScreenState extends State<PermissionRequestScreen> {
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -212,7 +212,7 @@ class _PermissionRequestScreenState extends State<PermissionRequestScreen> {
           LinearProgressIndicator(
             value: _isProcessing ? _progressValue : progress,
             backgroundColor:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+                AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
             valueColor: AlwaysStoppedAnimation<Color>(
               AppTheme.lightTheme.colorScheme.secondary,
             ),

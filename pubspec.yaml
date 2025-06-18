@@ -2,15 +2,11 @@ name: pothole_impact_tracker
 description: A new Flutter project.
 version: 1.0.0+1
 environment: 
-  sdk: ^3.6.0
+  sdk: '>=3.0.0 <4.0.0'
 
 # Platform configuration
 platforms:
   android: true
-  ios: true
-  macos: true
-  web: true
-  windows: false # Explicitly set to false to avoid looking for wakelock_windows
 
 dependencies: 
   flutter: 

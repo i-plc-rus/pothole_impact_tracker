@@ -90,7 +90,7 @@ class SensorVisualizationWidget extends StatelessWidget {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: indicatorColor.withValues(alpha: 0.1),
+            color: indicatorColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Center(
@@ -142,7 +142,7 @@ class SensorVisualizationWidget extends StatelessWidget {
               LinearProgressIndicator(
                 value: (value.abs() / (threshold * 2)).clamp(0.0, 1.0),
                 backgroundColor: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.2),
+                    .withOpacity(0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(indicatorColor),
               ),
             ],

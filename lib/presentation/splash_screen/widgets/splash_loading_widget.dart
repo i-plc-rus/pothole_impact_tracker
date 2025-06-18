@@ -19,10 +19,10 @@ class SplashLoadingWidget extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 32.w),
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
+          color: Colors.white.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -34,7 +34,7 @@ class SplashLoadingWidget extends StatelessWidget {
             width: double.infinity,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(2),
             ),
             child: FractionallySizedBox(
@@ -72,12 +72,12 @@ class SplashLoadingWidget extends StatelessWidget {
                       color: isCompleted
                           ? Colors.white
                           : isCurrent
-                              ? Colors.white.withValues(alpha: 0.3)
+                              ? Colors.white.withOpacity(0.3)
                               : Colors.transparent,
                       shape: BoxShape.circle,
                       border: isPending
                           ? Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: Colors.white.withOpacity(0.3),
                               width: 1,
                             )
                           : null,
@@ -102,7 +102,7 @@ class SplashLoadingWidget extends StatelessWidget {
                                 )
                               : CustomIconWidget(
                                   iconName: step["icon"] as String,
-                                  color: Colors.white.withValues(alpha: 0.4),
+                                  color: Colors.white.withOpacity(0.4),
                                   size: 14.sp,
                                 ),
                     ),
@@ -117,7 +117,7 @@ class SplashLoadingWidget extends StatelessWidget {
                       style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                         color: isCompleted || isCurrent
                             ? Colors.white
-                            : Colors.white.withValues(alpha: 0.6),
+                            : Colors.white.withOpacity(0.6),
                         fontWeight:
                             isCurrent ? FontWeight.w500 : FontWeight.w400,
                       ),

@@ -60,7 +60,7 @@ class _DateRangeSelectorWidgetState extends State<DateRangeSelectorWidget> {
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.3),
+          color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.3),
         ),
       ),
       child: Row(
@@ -97,7 +97,7 @@ class _DateRangeSelectorWidgetState extends State<DateRangeSelectorWidget> {
             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppTheme.lightTheme.colorScheme.secondary
-                  .withValues(alpha: 0.1),
+                  .withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(

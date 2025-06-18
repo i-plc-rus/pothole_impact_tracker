@@ -510,7 +510,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               borderRadius: BorderRadius.circular(12.sp),
               border: Border.all(
                 color: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.2),
+                    .withOpacity(0.2),
               ),
             ),
             child: Column(

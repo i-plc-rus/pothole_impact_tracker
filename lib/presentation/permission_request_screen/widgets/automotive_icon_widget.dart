@@ -78,7 +78,7 @@ class _AutomotiveIconWidgetState extends State<AutomotiveIconWidget>
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: AppTheme.lightTheme.colorScheme.secondary
-                          .withValues(alpha: 0.3),
+                          .withOpacity(0.3),
                       width: 2,
                     ),
                   ),
@@ -151,11 +151,11 @@ class _AutomotiveIconWidgetState extends State<AutomotiveIconWidget>
                   height: 60,
                   decoration: BoxDecoration(
                     color: AppTheme.lightTheme.colorScheme.secondary
-                        .withValues(alpha: 0.1),
+                        .withOpacity(0.1),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: AppTheme.lightTheme.colorScheme.secondary
-                          .withValues(alpha: 0.3),
+                          .withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -181,8 +181,7 @@ class _AutomotiveIconWidgetState extends State<AutomotiveIconWidget>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppTheme.lightTheme.colorScheme.secondary.withValues(
-                      alpha: 0.2 * (1 - _pulseController.value),
+                    color: AppTheme.lightTheme.colorScheme.secondary.withOpacity(0.2 * (1 - _pulseController.value),
                     ),
                     width: 2,
                   ),

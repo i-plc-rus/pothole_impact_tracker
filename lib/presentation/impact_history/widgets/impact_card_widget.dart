@@ -86,7 +86,7 @@ class ImpactCardWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? AppTheme.lightTheme.colorScheme.secondary
-                    .withValues(alpha: 0.1)
+                    .withOpacity(0.1)
                 : AppTheme.lightTheme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: isSelected

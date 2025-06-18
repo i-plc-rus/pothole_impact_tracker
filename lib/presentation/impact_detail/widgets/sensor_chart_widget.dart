@@ -86,13 +86,13 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                 getDrawingHorizontalLine: (value) {
                   return FlLine(
                       color: AppTheme.lightTheme.colorScheme.outline
-                          .withValues(alpha: 0.2),
+                          .withOpacity(0.2),
                       strokeWidth: 1);
                 },
                 getDrawingVerticalLine: (value) {
                   return FlLine(
                       color: AppTheme.lightTheme.colorScheme.outline
-                          .withValues(alpha: 0.2),
+                          .withOpacity(0.2),
                       strokeWidth: 1);
                 }),
             titlesData: FlTitlesData(
@@ -129,7 +129,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                 show: true,
                 border: Border.all(
                     color: AppTheme.lightTheme.colorScheme.outline
-                        .withValues(alpha: 0.2))),
+                        .withOpacity(0.2))),
             minX: 0,
             maxX: 0.8,
             minY: 0,
@@ -145,7 +145,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                   dotData: FlDotData(show: false),
                   belowBarData: BarAreaData(
                       show: true,
-                      color: AppTheme.errorLight.withValues(alpha: 0.1))),
+                      color: AppTheme.errorLight.withOpacity(0.1))),
               // Y-axis
               LineChartBarData(
                   spots: _getAccelerometerSpots('y'),
@@ -156,7 +156,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                   dotData: FlDotData(show: false),
                   belowBarData: BarAreaData(
                       show: true,
-                      color: AppTheme.successLight.withValues(alpha: 0.1))),
+                      color: AppTheme.successLight.withOpacity(0.1))),
               // Z-axis
               LineChartBarData(
                   spots: _getAccelerometerSpots('z'),
@@ -167,7 +167,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                   dotData: FlDotData(show: false),
                   belowBarData: BarAreaData(
                       show: true,
-                      color: AppTheme.accentLight.withValues(alpha: 0.1))),
+                      color: AppTheme.accentLight.withOpacity(0.1))),
             ],
             lineTouchData: LineTouchData(
                 enabled: true,
@@ -199,13 +199,13 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                 getDrawingHorizontalLine: (value) {
                   return FlLine(
                       color: AppTheme.lightTheme.colorScheme.outline
-                          .withValues(alpha: 0.2),
+                          .withOpacity(0.2),
                       strokeWidth: 1);
                 },
                 getDrawingVerticalLine: (value) {
                   return FlLine(
                       color: AppTheme.lightTheme.colorScheme.outline
-                          .withValues(alpha: 0.2),
+                          .withOpacity(0.2),
                       strokeWidth: 1);
                 }),
             titlesData: FlTitlesData(
@@ -242,7 +242,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                 show: true,
                 border: Border.all(
                     color: AppTheme.lightTheme.colorScheme.outline
-                        .withValues(alpha: 0.2))),
+                        .withOpacity(0.2))),
             minX: 0,
             maxX: 0.8,
             minY: 0,
@@ -258,7 +258,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                   dotData: FlDotData(show: false),
                   belowBarData: BarAreaData(
                       show: true,
-                      color: AppTheme.errorLight.withValues(alpha: 0.1))),
+                      color: AppTheme.errorLight.withOpacity(0.1))),
               // Y-axis
               LineChartBarData(
                   spots: _getGyroscopeSpots('y'),
@@ -269,7 +269,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                   dotData: FlDotData(show: false),
                   belowBarData: BarAreaData(
                       show: true,
-                      color: AppTheme.successLight.withValues(alpha: 0.1))),
+                      color: AppTheme.successLight.withOpacity(0.1))),
               // Z-axis
               LineChartBarData(
                   spots: _getGyroscopeSpots('z'),
@@ -280,7 +280,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                   dotData: FlDotData(show: false),
                   belowBarData: BarAreaData(
                       show: true,
-                      color: AppTheme.accentLight.withValues(alpha: 0.1))),
+                      color: AppTheme.accentLight.withOpacity(0.1))),
             ],
             lineTouchData: LineTouchData(
                 enabled: true,
@@ -330,7 +330,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
                 color: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.2))),
+                    .withOpacity(0.2))),
         child: Column(children: [
           // Tab Bar
           Container(
@@ -338,7 +338,7 @@ class _SensorChartWidgetState extends State<SensorChartWidget>
                   border: Border(
                       bottom: BorderSide(
                           color: AppTheme.lightTheme.colorScheme.outline
-                              .withValues(alpha: 0.2)))),
+                              .withOpacity(0.2)))),
               child: TabBar(controller: _tabController, tabs: [
                 Tab(text: 'Акселерометр'),
                 Tab(text: 'Гироскоп'),
