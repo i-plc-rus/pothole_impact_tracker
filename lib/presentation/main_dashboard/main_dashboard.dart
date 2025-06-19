@@ -47,7 +47,8 @@ class _MainDashboardState extends State<MainDashboard>
       "accelerometer_x": 0.0,
       "accelerometer_y": 0.0,
       "accelerometer_z": 0.0,
-      "threshold": 2.5
+      "threshold": 2.5,
+      "z_threshold": 3.0
     },
     "weekly_impacts": [
       {"date": "18.11.2024", "count": 12},
