@@ -515,7 +515,7 @@ class _ImpactHistoryState extends State<ImpactHistory>
                 height: 60,
                 decoration: BoxDecoration(
                   color: AppTheme.lightTheme.colorScheme.outline
-                      .withValues(alpha: 0.3),
+                      .withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -529,7 +529,7 @@ class _ImpactHistoryState extends State<ImpactHistory>
                       height: 16,
                       decoration: BoxDecoration(
                         color: AppTheme.lightTheme.colorScheme.outline
-                            .withValues(alpha: 0.3),
+                            .withOpacity(0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -539,7 +539,7 @@ class _ImpactHistoryState extends State<ImpactHistory>
                       height: 14,
                       decoration: BoxDecoration(
                         color: AppTheme.lightTheme.colorScheme.outline
-                            .withValues(alpha: 0.3),
+                            .withOpacity(0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),

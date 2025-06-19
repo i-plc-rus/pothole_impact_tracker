@@ -44,7 +44,7 @@ class RelatedImpactsWidget extends StatelessWidget {
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -100,7 +100,7 @@ class RelatedImpactsWidget extends StatelessWidget {
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -111,10 +111,10 @@ class RelatedImpactsWidget extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getSeverityColor(severity).withValues(alpha: 0.1),
+                  color: _getSeverityColor(severity).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _getSeverityColor(severity).withValues(alpha: 0.3),
+                    color: _getSeverityColor(severity).withOpacity(0.3),
                   ),
                 ),
                 child: Text(

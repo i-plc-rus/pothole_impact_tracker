@@ -299,7 +299,7 @@ class _ImpactDetailState extends State<ImpactDetail> {
                 border: Border(
                   bottom: BorderSide(
                     color: AppTheme.lightTheme.colorScheme.outline
-                        .withValues(alpha: 0.2),
+                        .withOpacity(0.2),
                     width: 1,
                   ),
                 ),
@@ -460,7 +460,7 @@ class _ImpactDetailState extends State<ImpactDetail> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: AppTheme.lightTheme.colorScheme.outline
-                                .withValues(alpha: 0.2),
+                                .withOpacity(0.2),
                           ),
                         ),
                         child: Text(

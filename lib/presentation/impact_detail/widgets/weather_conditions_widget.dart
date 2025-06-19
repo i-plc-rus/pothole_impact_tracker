@@ -32,7 +32,7 @@ class WeatherConditionsWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: AppTheme.lightTheme.colorScheme.outline
-                  .withValues(alpha: 0.2),
+                  .withOpacity(0.2),
             ),
           ),
           child: Column(
@@ -42,7 +42,7 @@ class WeatherConditionsWidget extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _getTemperatureColor().withValues(alpha: 0.1),
+                      color: _getTemperatureColor().withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: CustomIconWidget(
@@ -81,7 +81,7 @@ class WeatherConditionsWidget extends StatelessWidget {
               SizedBox(height: 16),
               Divider(
                 color: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.2),
+                    .withOpacity(0.2),
               ),
               SizedBox(height: 16),
               Row(
@@ -89,7 +89,7 @@ class WeatherConditionsWidget extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _getRoadConditionColor().withValues(alpha: 0.1),
+                      color: _getRoadConditionColor().withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: CustomIconWidget(
@@ -130,10 +130,10 @@ class WeatherConditionsWidget extends StatelessWidget {
                 width: double.infinity,
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.warningLight.withValues(alpha: 0.1),
+                  color: AppTheme.warningLight.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AppTheme.warningLight.withValues(alpha: 0.3),
+                    color: AppTheme.warningLight.withOpacity(0.3),
                   ),
                 ),
                 child: Row(

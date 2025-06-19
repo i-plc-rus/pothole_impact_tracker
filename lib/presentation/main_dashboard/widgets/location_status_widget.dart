@@ -106,10 +106,10 @@ class LocationStatusWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.successLight.withValues(alpha: 0.1),
+                color: AppTheme.successLight.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppTheme.successLight.withValues(alpha: 0.3),
+                  color: AppTheme.successLight.withOpacity(0.3),
                   width: 1,
                 ),
               ),

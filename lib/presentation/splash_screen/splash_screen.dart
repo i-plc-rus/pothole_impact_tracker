@@ -193,7 +193,7 @@ class _SplashScreenState extends State<SplashScreen>
                 colors: [
                   AppTheme.lightTheme.colorScheme.primary,
                   AppTheme.lightTheme.colorScheme.primary
-                      .withValues(alpha: 0.8),
+                      .withOpacity(0.8),
                   AppTheme.lightTheme.colorScheme.secondary,
                 ],
                 stops: const [0.0, 0.6, 1.0],
@@ -237,7 +237,7 @@ class _SplashScreenState extends State<SplashScreen>
                   Text(
                     'Мониторинг дорожных ударов',
                     style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: Colors.white.withOpacity(0.9),
                       fontWeight: FontWeight.w400,
                     ),
                     textAlign: TextAlign.center,
@@ -257,7 +257,7 @@ class _SplashScreenState extends State<SplashScreen>
                   Text(
                     'Загрузка...',
                     style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: Colors.white.withOpacity(0.8),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -270,7 +270,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Text(
                       'Версия 1.0.0',
                       style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withOpacity(0.6),
                         fontSize: 12.sp,
                       ),
                     ),

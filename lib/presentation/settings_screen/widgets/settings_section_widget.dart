@@ -21,7 +21,7 @@ class SettingsSectionWidget extends StatelessWidget {
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12.sp),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.1),
+          color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.1),
         ),
       ),
       child: Column(
@@ -53,7 +53,7 @@ class SettingsSectionWidget extends StatelessWidget {
             height: 1,
             thickness: 1,
             color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.1),
+                AppTheme.lightTheme.colorScheme.outline.withOpacity(0.1),
             indent: 16.sp,
             endIndent: 16.sp,
           ),

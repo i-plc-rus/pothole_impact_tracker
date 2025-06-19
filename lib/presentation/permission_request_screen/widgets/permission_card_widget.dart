@@ -29,8 +29,8 @@ class PermissionCardWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isGranted
-              ? AppTheme.lightTheme.colorScheme.tertiary.withValues(alpha: 0.3)
-              : AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+              ? AppTheme.lightTheme.colorScheme.tertiary.withOpacity(0.3)
+              : AppTheme.lightTheme.colorScheme.outline.withOpacity(0.2),
           width: isGranted ? 2 : 1,
         ),
       ),
@@ -44,9 +44,9 @@ class PermissionCardWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isGranted
                       ? AppTheme.lightTheme.colorScheme.tertiary
-                          .withValues(alpha: 0.1)
+                          .withOpacity(0.1)
                       : AppTheme.lightTheme.colorScheme.secondary
-                          .withValues(alpha: 0.1),
+                          .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: CustomIconWidget(
@@ -79,7 +79,7 @@ class PermissionCardWidget extends StatelessWidget {
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: AppTheme.lightTheme.colorScheme.error
-                                  .withValues(alpha: 0.1),
+                                  .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -100,9 +100,9 @@ class PermissionCardWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isGranted
                             ? AppTheme.lightTheme.colorScheme.tertiary
-                                .withValues(alpha: 0.1)
+                                .withOpacity(0.1)
                             : AppTheme.lightTheme.colorScheme.outline
-                                .withValues(alpha: 0.1),
+                                .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(

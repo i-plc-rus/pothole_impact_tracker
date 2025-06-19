@@ -729,15 +729,11 @@ Map<String, dynamic> getTextStyle(TextStyle? style, BuildContext context) {
   }
 
 String colorToHex(Color color) {
-  var alphaColor =
-  (color.a * 255).round().toRadixString(16).padLeft(2, '0').toUpperCase();
-  var redColor =
-  (color.r * 255).round().toRadixString(16).padLeft(2, '0').toUpperCase();
-  var greenColor =
-  (color.g * 255).round().toRadixString(16).padLeft(2, '0').toUpperCase();
-  var blueColor =
-  (color.b * 255).round().toRadixString(16).padLeft(2, '0').toUpperCase();
-  return '0X$alphaColor$redColor$greenColor$blueColor';
+  return '0xFF'
+      '${color.alpha.toRadixString(16).padLeft(2, '0').toUpperCase()}'
+      '${color.red.toRadixString(16).padLeft(2, '0').toUpperCase()}'
+      '${color.green.toRadixString(16).padLeft(2, '0').toUpperCase()}'
+      '${color.blue.toRadixString(16).padLeft(2, '0').toUpperCase()}';
 }
 
 Map<String, String> widgetStatePropertyToResolvedValues<T>(

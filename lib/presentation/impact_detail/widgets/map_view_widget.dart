@@ -61,7 +61,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.2),
+                    .withOpacity(0.2),
               ),
             ),
             child: ClipRRect(
@@ -75,8 +75,8 @@ class _MapViewWidgetState extends State<MapViewWidget> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppTheme.accentLight.withValues(alpha: 0.1),
-                          AppTheme.successLight.withValues(alpha: 0.1),
+                          AppTheme.accentLight.withOpacity(0.1),
+                          AppTheme.successLight.withOpacity(0.1),
                         ],
                       ),
                     ),
@@ -102,7 +102,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
                             boxShadow: [
                               BoxShadow(
                                 color:
-                                    AppTheme.errorLight.withValues(alpha: 0.3),
+                                    AppTheme.errorLight.withOpacity(0.3),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -120,7 +120,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
                               EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: AppTheme.lightTheme.scaffoldBackgroundColor
-                                .withValues(alpha: 0.9),
+                                .withOpacity(0.9),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -143,7 +143,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: AppTheme.lightTheme.scaffoldBackgroundColor
-                            .withValues(alpha: 0.9),
+                            .withOpacity(0.9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: CustomIconWidget(
@@ -163,7 +163,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppTheme.lightTheme.scaffoldBackgroundColor
-                            .withValues(alpha: 0.9),
+                            .withOpacity(0.9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -198,7 +198,7 @@ class _MapViewWidgetState extends State<MapViewWidget> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: AppTheme.lightTheme.colorScheme.outline
-                  .withValues(alpha: 0.2),
+                  .withOpacity(0.2),
             ),
           ),
           child: Column(
@@ -263,7 +263,7 @@ class MockMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.3)
+      ..color = AppTheme.lightTheme.colorScheme.outline.withOpacity(0.3)
       ..strokeWidth = 2;
 
     // Draw mock road lines
@@ -287,7 +287,7 @@ class MockMapPainter extends CustomPainter {
 
     // Draw mock buildings
     final buildingPaint = Paint()
-      ..color = AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.1);
+      ..color = AppTheme.lightTheme.colorScheme.outline.withOpacity(0.1);
 
     canvas.drawRect(
       Rect.fromLTWH(size.width * 0.1, size.height * 0.1, size.width * 0.2,
