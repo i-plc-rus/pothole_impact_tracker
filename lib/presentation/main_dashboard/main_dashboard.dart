@@ -17,10 +17,6 @@ import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-
-
-
-
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
 
@@ -35,7 +31,7 @@ class _MainDashboardState extends State<MainDashboard>
   bool _isRefreshing = false;
 
   // Подписка на акселерометр
-  
+
   double _accelX = 0.0;
   double _accelY = 0.0;
   double _accelZ = 0.0;
@@ -46,7 +42,7 @@ class _MainDashboardState extends State<MainDashboard>
   late StreamSubscription<Position> _positionSubscription;
   late Timer _uploadTimer;
 
-   final String sessionId = const Uuid().v4();
+  final String sessionId = const Uuid().v4();
 
   // Mock data for the dashboard
   final Map<String, dynamic> _dashboardData = {
@@ -131,47 +127,57 @@ class _MainDashboardState extends State<MainDashboard>
   });
 }*/
 
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    //_updateLocation(); // ← Добавлено
-     //_startLocationUpdates();
-
-    /*_accelerometerSubscription =
-        accelerometerEventStream().listen((AccelerometerEvent event) {
-      setState(() {
-        _accelX = event.x;
-        _accelY = event.y;
-        _accelZ = event.z;
-
-        _dashboardData["sensor_data"] = {
-          "accelerometer_x": _accelX,
-          "accelerometer_y": _accelY,
-          "accelerometer_z": _accelZ,
-          "threshold": 2.5,
-          "z_threshold": 3.0
-        };
-      });
-    });*/
     _initSensors();
     _startUploadTimer();
   }
 
+  Future<bool> checkAndRequestLocationPermission() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Можно показать сообщение пользователю
+      debugPrint("GPS is disabled.");
+      return false;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        debugPrint("Location permission denied.");
+        return false;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      debugPrint("Location permission permanently denied.");
+      return false;
+    }
+
+    return true;
+  }
+
   Future<void> _initSensors() async {
+    bool hasPermission = await checkAndRequestLocationPermission();
+    if (!hasPermission) return;
+
     _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 5),
+      locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high, distanceFilter: 5),
     ).listen((Position pos) {
       setState(() {
         _latitude = pos.latitude;
         _longitude = pos.longitude;
-        _dashboardData["current_location"] = "${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}";
+        _dashboardData["current_location"] =
+            "${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}";
       });
       LocalDatabase.insertData({
         "session_id": sessionId,
-        "timestamp": DateTime.now().toIso8601String(),
+        "date_upd": DateTime.now().toIso8601String(),
         "latitude": pos.latitude,
         "longitude": pos.longitude,
         "accel_x": null,
@@ -180,7 +186,7 @@ class _MainDashboardState extends State<MainDashboard>
       });
     });
 
- _accelerometerSubscription = accelerometerEventStream().listen((event) {
+    _accelerometerSubscription = accelerometerEventStream().listen((event) {
       setState(() {
         _accelX = event.x;
         _accelY = event.y;
@@ -195,7 +201,7 @@ class _MainDashboardState extends State<MainDashboard>
       });
       LocalDatabase.insertData({
         "session_id": sessionId,
-        "timestamp": DateTime.now().toIso8601String(),
+        "date_upd": DateTime.now().toIso8601String(),
         "latitude": null,
         "longitude": null,
         "accel_x": event.x,
@@ -217,7 +223,7 @@ class _MainDashboardState extends State<MainDashboard>
 
       try {
         final response = await http.post(
-          Uri.parse("https://your-api-endpoint.com/upload"),
+          Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(payload),
         );
@@ -232,7 +238,7 @@ class _MainDashboardState extends State<MainDashboard>
   void dispose() {
     _tabController.dispose();
     _accelerometerSubscription.cancel();
-     _positionSubscription.cancel();
+    _positionSubscription.cancel();
     super.dispose();
   }
 
@@ -267,7 +273,7 @@ class _MainDashboardState extends State<MainDashboard>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      
+    return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
@@ -393,7 +399,8 @@ class _MainDashboardState extends State<MainDashboard>
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context  as BuildContext, '/impact-history'),
+            onPressed: () =>
+                Navigator.pushNamed(context as BuildContext, '/impact-history'),
             child: const Text('Открыть историю'),
           ),
         ],
@@ -426,7 +433,8 @@ class _MainDashboardState extends State<MainDashboard>
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context  as BuildContext, '/settings-screen'),
+            onPressed: () => Navigator.pushNamed(
+                context as BuildContext, '/settings-screen'),
             child: const Text('Открыть настройки'),
           ),
         ],
@@ -447,7 +455,7 @@ class LocalDatabase {
         CREATE TABLE sensor_log (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           session_id TEXT,
-          timestamp TEXT,
+          date_upd TEXT,
           latitude REAL,
           longitude REAL,
           accel_x REAL,
