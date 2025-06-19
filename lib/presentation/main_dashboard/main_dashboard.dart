@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:async';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../core/app_export.dart';
 import './widgets/impact_chart_widget.dart';
@@ -32,6 +33,9 @@ class _MainDashboardState extends State<MainDashboard>
   double _accelY = 0.0;
   double _accelZ = 0.0;
 
+  double? _latitude;
+  double? _longitude;
+
   // Mock data for the dashboard
   final Map<String, dynamic> _dashboardData = {
     "monitoring_status": "active",
@@ -40,7 +44,7 @@ class _MainDashboardState extends State<MainDashboard>
     "severe_impacts": 4,
     "distance_traveled": 156.7,
     "average_speed": 45.2,
-    "current_location": "Москва, Россия",
+    "current_location": "-",
     "last_impact_time": "14:32",
     "battery_level": 85,
     "sensor_data": {
@@ -61,10 +65,38 @@ class _MainDashboardState extends State<MainDashboard>
     ]
   };
 
+  Future<void> _updateLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+
+    if (permission == LocationPermission.deniedForever) return;
+
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+  setState(() {
+    _latitude = position.latitude;
+    _longitude = position.longitude;
+    _dashboardData["current_location"] = '${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}';
+  });
+}
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    _updateLocation(); // ← Добавлено
 
     _accelerometerSubscription =
         accelerometerEventStream().listen((AccelerometerEvent event) {

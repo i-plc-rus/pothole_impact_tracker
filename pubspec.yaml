@@ -24,6 +24,7 @@ dependencies:
   sqflite: ^2.3.0
   workmanager: ^0.5.2
   web: any
+  geolocator: ^11.0.0
 
 dev_dependencies: 
   flutter_test: 
