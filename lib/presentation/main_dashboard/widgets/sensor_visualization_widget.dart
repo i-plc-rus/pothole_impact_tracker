@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 import '../../../../core/app_export.dart';
 
@@ -18,7 +19,9 @@ class SensorVisualizationWidget extends StatelessWidget {
         (sensorData["accelerometer_y"] as num).toDouble();
     final double accelerometerZ =
         (sensorData["accelerometer_z"] as num).toDouble();
+
     final double threshold = (sensorData["threshold"] as num).toDouble();
+    final double zThreshold = (sensorData["z_threshold"] as num?)?.toDouble() ?? 3.0;
 
     return Card(
       child: Padding(
@@ -47,28 +50,40 @@ class SensorVisualizationWidget extends StatelessWidget {
             const SizedBox(height: 12),
             _buildSensorReading('Y', accelerometerY, threshold),
             const SizedBox(height: 12),
-            _buildSensorReading('Z', accelerometerZ, threshold),
+            _buildSensorReading('Z', accelerometerZ - 9.8, zThreshold), // вычитаем гравитацию
 
             const SizedBox(height: 16),
 
-            // Threshold indicator
+            // Threshold indicators
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomIconWidget(
-                    iconName: 'tune',
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    size: 16,
+                  Row(
+                    children: [
+                      CustomIconWidget(
+                        iconName: 'tune',
+                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Порог X/Y: ${threshold.toStringAsFixed(1)} м/с²',
+                        style: AppTheme.lightTheme.textTheme.bodySmall,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    'Порог срабатывания: ${threshold.toStringAsFixed(1)} м/с²',
-                    style: AppTheme.lightTheme.textTheme.bodySmall,
+                    'Порог Z (откл. от 9.8): ${zThreshold.toStringAsFixed(1)} м/с²',
+                    style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -83,6 +98,10 @@ class SensorVisualizationWidget extends StatelessWidget {
     final bool isAboveThreshold = value.abs() > threshold;
     final Color indicatorColor =
         isAboveThreshold ? AppTheme.errorLight : AppTheme.successLight;
+
+    final String displayValue = axis == 'Z'
+        ? '${(value + 9.8).toStringAsFixed(2)} м/с²' // показать нормализованное значение
+        : '${value.toStringAsFixed(2)} м/с²';
 
     return Row(
       children: [
@@ -112,7 +131,7 @@ class SensorVisualizationWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${value.toStringAsFixed(2)} м/с²',
+                    displayValue,
                     style: AppTheme.getMonospaceStyle(
                       isLight: true,
                       fontSize: 14,
