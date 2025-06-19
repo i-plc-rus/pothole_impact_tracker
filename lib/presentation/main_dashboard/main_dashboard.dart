@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'dart:async';
 
 import '../../../core/app_export.dart';
 import './widgets/impact_chart_widget.dart';
@@ -7,6 +9,9 @@ import './widgets/location_status_widget.dart';
 import './widgets/monitoring_status_widget.dart';
 import './widgets/sensor_visualization_widget.dart';
 import './widgets/statistics_cards_widget.dart';
+
+
+
 
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
@@ -21,6 +26,12 @@ class _MainDashboardState extends State<MainDashboard>
   bool _isMonitoring = true;
   bool _isRefreshing = false;
 
+  // Подписка на акселерометр
+  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+  double _accelX = 0.0;
+  double _accelY = 0.0;
+  double _accelZ = 0.0;
+
   // Mock data for the dashboard
   final Map<String, dynamic> _dashboardData = {
     "monitoring_status": "active",
@@ -33,9 +44,9 @@ class _MainDashboardState extends State<MainDashboard>
     "last_impact_time": "14:32",
     "battery_level": 85,
     "sensor_data": {
-      "accelerometer_x": 0.2,
-      "accelerometer_y": -0.1,
-      "accelerometer_z": 9.8,
+      "accelerometer_x": 0.0,
+      "accelerometer_y": 0.0,
+      "accelerometer_z": 0.0,
       "threshold": 2.5
     },
     "weekly_impacts": [
@@ -53,11 +64,28 @@ class _MainDashboardState extends State<MainDashboard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    _accelerometerSubscription =
+        accelerometerEventStream().listen((AccelerometerEvent event) {
+      setState(() {
+        _accelX = event.x;
+        _accelY = event.y;
+        _accelZ = event.z;
+
+        _dashboardData["sensor_data"] = {
+          "accelerometer_x": _accelX,
+          "accelerometer_y": _accelY,
+          "accelerometer_z": _accelZ,
+          "threshold": 2.5
+        };
+      });
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _accelerometerSubscription.cancel();
     super.dispose();
   }
 
@@ -92,7 +120,7 @@ class _MainDashboardState extends State<MainDashboard>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(      
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
