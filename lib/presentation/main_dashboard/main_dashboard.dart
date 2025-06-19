@@ -35,6 +35,7 @@ class _MainDashboardState extends State<MainDashboard>
 
   double? _latitude;
   double? _longitude;
+  late StreamSubscription<Position> _positionSubscription;
 
   // Mock data for the dashboard
   final Map<String, dynamic> _dashboardData = {
@@ -91,12 +92,42 @@ class _MainDashboardState extends State<MainDashboard>
   });
 }
 
+void _startLocationUpdates() async {
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  if (!serviceEnabled) return;
+
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) return;
+  }
+
+  if (permission == LocationPermission.deniedForever) return;
+
+  _positionSubscription = Geolocator.getPositionStream(
+    locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 5, // минимальное расстояние в метрах до нового события
+    ),
+  ).listen((Position position) {
+    setState(() {
+      _latitude = position.latitude;
+      _longitude = position.longitude;
+      _dashboardData["current_location"] =
+          '${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}';
+    });
+  });
+}
+
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    _updateLocation(); // ← Добавлено
+    //_updateLocation(); // ← Добавлено
+     _startLocationUpdates();
 
     _accelerometerSubscription =
         accelerometerEventStream().listen((AccelerometerEvent event) {
@@ -109,7 +140,8 @@ class _MainDashboardState extends State<MainDashboard>
           "accelerometer_x": _accelX,
           "accelerometer_y": _accelY,
           "accelerometer_z": _accelZ,
-          "threshold": 2.5
+          "threshold": 2.5,
+          "z_threshold": 3.0
         };
       });
     });
@@ -119,6 +151,7 @@ class _MainDashboardState extends State<MainDashboard>
   void dispose() {
     _tabController.dispose();
     _accelerometerSubscription.cancel();
+     _positionSubscription.cancel();
     super.dispose();
   }
 
