@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:async';
+import 'package:geolocator/geolocator.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/app_export.dart';
 import './widgets/impact_chart_widget.dart';
@@ -10,8 +12,12 @@ import './widgets/monitoring_status_widget.dart';
 import './widgets/sensor_visualization_widget.dart';
 import './widgets/statistics_cards_widget.dart';
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
@@ -27,10 +33,19 @@ class _MainDashboardState extends State<MainDashboard>
   bool _isRefreshing = false;
 
   // Подписка на акселерометр
-  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+
   double _accelX = 0.0;
   double _accelY = 0.0;
   double _accelZ = 0.0;
+
+  double? _latitude;
+  double? _longitude;
+  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+  late StreamSubscription<Position> _positionSubscription;
+  late Timer _uploadTimer;
+
+  //final String sessionId = const Uuid().v4();
+  late final String sessionId;
 
   // Mock data for the dashboard
   final Map<String, dynamic> _dashboardData = {
@@ -40,7 +55,7 @@ class _MainDashboardState extends State<MainDashboard>
     "severe_impacts": 4,
     "distance_traveled": 156.7,
     "average_speed": 45.2,
-    "current_location": "Москва, Россия",
+    "current_location": "-",
     "last_impact_time": "14:32",
     "battery_level": 85,
     "sensor_data": {
@@ -51,42 +66,147 @@ class _MainDashboardState extends State<MainDashboard>
       "z_threshold": 3.0
     },
     "weekly_impacts": [
-      {"date": "18.11.2024", "count": 12},
-      {"date": "19.11.2024", "count": 8},
-      {"date": "20.11.2024", "count": 15},
-      {"date": "21.11.2024", "count": 23},
-      {"date": "22.11.2024", "count": 19},
-      {"date": "23.11.2024", "count": 11},
-      {"date": "24.11.2024", "count": 7}
+      {"date": "18.06.2025", "count": 12},
+      {"date": "19.06.2025", "count": 8},
+      {"date": "20.06.2025", "count": 15},      
     ]
   };
+
 
   @override
   void initState() {
     super.initState();
+    SessionManager.getSessionId().then((id) {
+      sessionId = id;
+      _initSensors();
+      _startUploadTimer();
+    });
+    
     _tabController = TabController(length: 3, vsync: this);
 
-    _accelerometerSubscription =
-        accelerometerEventStream().listen((AccelerometerEvent event) {
+    _initSensors();    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    //_startUploadTimer(context as BuildContext);
+      _startUploadTimer();
+  });
+  }
+
+  Future<bool> checkAndRequestLocationPermission() async {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+          const SnackBar(content: Text('Пожалуйста, включите GPS')),
+        );
+        debugPrint("GPS is disabled.");
+        return false;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+            const SnackBar(content: Text('Разрешение на геолокацию отклонено')),
+          );
+          debugPrint("Location permission denied.");
+          return false;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+          const SnackBar(content: Text('Разрешение на геолокацию отклонено навсегда')),
+        );
+        debugPrint("Location permission permanently denied.");
+        return false;
+      }
+
+      return true;
+    }
+  
+  
+
+  Future<void> _initSensors() async {
+    bool hasPermission = await checkAndRequestLocationPermission();
+    if (!hasPermission) return;
+
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high, distanceFilter: 5),
+    ).listen((Position pos) {
+      setState(() {
+        _latitude = pos.latitude;
+        _longitude = pos.longitude;
+        _dashboardData["current_location"] =
+            "${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}";
+      });
+    });
+
+    _accelerometerSubscription = accelerometerEventStream().listen((event) {
       setState(() {
         _accelX = event.x;
         _accelY = event.y;
         _accelZ = event.z;
-
         _dashboardData["sensor_data"] = {
           "accelerometer_x": _accelX,
           "accelerometer_y": _accelY,
           "accelerometer_z": _accelZ,
-          "threshold": 2.5
+          "threshold": 2.5,
+          "z_threshold": 3.0
         };
+      });
+
+      // Insert combined data
+      LocalDatabase.insertData({
+        "session_id": sessionId,
+        "date_upd": DateTime.now().toUtc().toIso8601String(),
+        "latitude": _latitude,
+        "longitude": _longitude,
+        "accel_x": event.x,
+        "accel_y": event.y,
+        "accel_z": event.z,
       });
     });
   }
+
+  //void _startUploadTimer(BuildContext context) {
+  void _startUploadTimer() {
+  _uploadTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+    debugPrint("таймер");
+    final batch = await LocalDatabase.fetchBatchAndClear();
+    if (batch.isEmpty) {
+      debugPrint("НетДанных");
+      return;
+    }
+
+    final payload = {
+      "session_id": sessionId,
+      "data": batch,
+    };
+    debugPrint("Данные: ${payload.toString()}");
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(payload),
+      );
+      debugPrint("ОтветСервера: ${response.statusCode}");
+      debugPrint("ОтветСервера: ${response.body}");
+      debugPrint('Payload: ${jsonEncode(payload)}');
+      
+    } catch (e) {
+      debugPrint("Ошибка отправки: $e");
+    }
+  });
+}
+
 
   @override
   void dispose() {
     _tabController.dispose();
     _accelerometerSubscription.cancel();
+    _positionSubscription.cancel();
     super.dispose();
   }
 
@@ -116,12 +236,12 @@ class _MainDashboardState extends State<MainDashboard>
   }
 
   void _navigateToCalibration() {
-    Navigator.pushNamed(context, '/settings-screen');
+    Navigator.pushNamed(context as BuildContext, '/settings-screen');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      
+    return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
@@ -153,13 +273,27 @@ class _MainDashboardState extends State<MainDashboard>
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final batch = await LocalDatabase.fetchBatchAndClear();
+          debugPrint('Fetched batch: $batch'); // Log the data
+          final message = "Записей: ${batch.length}";
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        },
+        child: const Icon(Icons.bug_report),
+      ),
+      /*floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCalibration,
         child: CustomIconWidget(
           iconName: 'tune',
           color: AppTheme.lightTheme.colorScheme.onSecondary,
           size: 24,
         ),
-      ),
+      ),*/
     );
   }
 
@@ -247,7 +381,8 @@ class _MainDashboardState extends State<MainDashboard>
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, '/impact-history'),
+            onPressed: () =>
+                Navigator.pushNamed(context as BuildContext, '/impact-history'),
             child: const Text('Открыть историю'),
           ),
         ],
@@ -280,11 +415,71 @@ class _MainDashboardState extends State<MainDashboard>
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, '/settings-screen'),
+            onPressed: () => Navigator.pushNamed(
+                context as BuildContext, '/settings-screen'),
             child: const Text('Открыть настройки'),
           ),
         ],
       ),
     );
+  }
+}
+
+class LocalDatabase {
+  static Database? _db;
+
+  static Future<Database> get instance async {
+    if (_db != null) return _db!;
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'sensor_data.db');
+      debugPrint('Opening database at: $path'); // Add logging
+      _db = await openDatabase(path, version: 1, onCreate: (db, _) async {
+        debugPrint('Creating sensor_log table'); // Add logging
+        await db.execute('''
+          CREATE TABLE sensor_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT,
+            date_upd TEXT,
+            latitude REAL,
+            longitude REAL,
+            accel_x REAL,
+            accel_y REAL,
+            accel_z REAL
+          )
+        ''');
+      });
+      return _db!;
+    }
+
+  static Future<void> insertData(Map<String, dynamic> data) async {
+    try {
+      final db = await instance;
+      await db.insert('sensor_log', data);
+      //debugPrint('Inserted data: $data'); // Log successful insertion
+    } catch (e) {
+      debugPrint('Error inserting data: $e'); // Log error
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchBatchAndClear() async {
+    final db = await instance;
+    final data = await db.query('sensor_log', columns: ['date_upd', 'latitude', 'longitude', 'accel_x', 'accel_y', 'accel_z']);
+    await db.delete('sensor_log');
+    return data;
+  }
+}
+
+
+class SessionManager {
+  static const _key = 'session_id';
+
+  static Future<String> getSessionId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString(_key);
+    if (existing != null) return existing;
+
+    final newId = const Uuid().v4();
+    await prefs.setString(_key, newId);
+    return newId;
   }
 }

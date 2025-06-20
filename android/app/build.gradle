@@ -5,11 +5,40 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def args = ["-Xlint:deprecation", "-Xlint:unchecked", "-Werror"]
+
+project.getTasks().withType(JavaCompile) {
+    options.compilerArgs.addAll(args)
+}
 android {
+    compileSdkVersion flutter.compileSdkVersion
+
     namespace = "com.pothole_impact_tracker.app"
-    compileSdk = flutter.compileSdkVersion
+    //compileSdk = flutter.compileSdkVersion
+    //compileSdk = 33
     //ndkVersion = flutter.ndkVersion
     ndkVersion = "25.1.8937393"
+    //compileSdkVersion = 33
+    
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -25,11 +54,21 @@ android {
         applicationId = "com.pothole_impact_tracker.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        //minSdk = flutter.minSdkVersion
+        //targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        multiDexEnabled true
+        //minSdkVersion = 21
+        //targetSdkVersion = 33
+        //multiDexEnabled = true
+
+        //minSdk = 21
+        //targetSdk = 33
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        
     }
 
     buildTypes {
@@ -37,6 +76,12 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
+            //signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    outputFileName = "pothole_impact_tracker_${variant.versionName}.apk"
+                }
+            }
         }
     }
 }
