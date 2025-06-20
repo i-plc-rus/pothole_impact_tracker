@@ -65,7 +65,7 @@ class LocationStatusWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Last impact time
-            Row(
+            /*Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomIconWidget(
@@ -98,7 +98,7 @@ class LocationStatusWidget extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
+            ),*/
 
             const SizedBox(height: 16),
 

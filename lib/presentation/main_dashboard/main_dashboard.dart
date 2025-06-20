@@ -17,6 +17,8 @@ import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
 
@@ -42,7 +44,8 @@ class _MainDashboardState extends State<MainDashboard>
   late StreamSubscription<Position> _positionSubscription;
   late Timer _uploadTimer;
 
-  final String sessionId = const Uuid().v4();
+  //final String sessionId = const Uuid().v4();
+  late final String sessionId;
 
   // Mock data for the dashboard
   final Map<String, dynamic> _dashboardData = {
@@ -63,13 +66,9 @@ class _MainDashboardState extends State<MainDashboard>
       "z_threshold": 3.0
     },
     "weekly_impacts": [
-      // {"date": "18.11.2024", "count": 12},
-      // {"date": "19.11.2024", "count": 8},
-      // {"date": "20.11.2024", "count": 15},
-      // {"date": "21.11.2024", "count": 23},
-      // {"date": "22.11.2024", "count": 19},
-      // {"date": "23.11.2024", "count": 11},
-      // {"date": "24.11.2024", "count": 7}
+      {"date": "18.06.2025", "count": 12},
+      {"date": "19.06.2025", "count": 8},
+      {"date": "20.06.2025", "count": 15},      
     ]
   };
 
@@ -77,6 +76,12 @@ class _MainDashboardState extends State<MainDashboard>
   @override
   void initState() {
     super.initState();
+    SessionManager.getSessionId().then((id) {
+      sessionId = id;
+      _initSensors();
+      _startUploadTimer();
+    });
+    
     _tabController = TabController(length: 3, vsync: this);
 
     _initSensors();    
@@ -154,7 +159,7 @@ class _MainDashboardState extends State<MainDashboard>
       // Insert combined data
       LocalDatabase.insertData({
         "session_id": sessionId,
-        "date_upd": DateTime.now().toIso8601String(),
+        "date_upd": DateTime.now().toUtc().toIso8601String(),
         "latitude": _latitude,
         "longitude": _longitude,
         "accel_x": event.x,
@@ -461,5 +466,20 @@ class LocalDatabase {
     final data = await db.query('sensor_log', columns: ['date_upd', 'latitude', 'longitude', 'accel_x', 'accel_y', 'accel_z']);
     await db.delete('sensor_log');
     return data;
+  }
+}
+
+
+class SessionManager {
+  static const _key = 'session_id';
+
+  static Future<String> getSessionId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString(_key);
+    if (existing != null) return existing;
+
+    final newId = const Uuid().v4();
+    await prefs.setString(_key, newId);
+    return newId;
   }
 }
