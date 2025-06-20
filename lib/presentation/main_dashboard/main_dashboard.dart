@@ -73,93 +73,53 @@ class _MainDashboardState extends State<MainDashboard>
     ]
   };
 
-  /*Future<void> _updateLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
-    }
-
-    if (permission == LocationPermission.deniedForever) return;
-
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-  setState(() {
-    _latitude = position.latitude;
-    _longitude = position.longitude;
-    _dashboardData["current_location"] = '${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}';
-  });
-}*/
-
-/*void _startLocationUpdates() async {
-  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  LocationPermission permission = await Geolocator.checkPermission();
-
-  if (!serviceEnabled) return;
-
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) return;
-  }
-
-  if (permission == LocationPermission.deniedForever) return;
-
-  _positionSubscription = Geolocator.getPositionStream(
-    locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 5, // минимальное расстояние в метрах до нового события
-    ),
-  ).listen((Position position) {
-    setState(() {
-      _latitude = position.latitude;
-      _longitude = position.longitude;
-      _dashboardData["current_location"] =
-          '${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}';
-    });
-  });
-}*/
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    _initSensors();
-    _startUploadTimer();
+    _initSensors();    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    //_startUploadTimer(context as BuildContext);
+      _startUploadTimer();
+  });
   }
 
   Future<bool> checkAndRequestLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Можно показать сообщение пользователю
-      debugPrint("GPS is disabled.");
-      return false;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        debugPrint("Location permission denied.");
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+          const SnackBar(content: Text('Пожалуйста, включите GPS')),
+        );
+        debugPrint("GPS is disabled.");
         return false;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      debugPrint("Location permission permanently denied.");
-      return false;
-    }
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+            const SnackBar(content: Text('Разрешение на геолокацию отклонено')),
+          );
+          debugPrint("Location permission denied.");
+          return false;
+        }
+      }
 
-    return true;
-  }
+      if (permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context as BuildContext).showSnackBar(
+          const SnackBar(content: Text('Разрешение на геолокацию отклонено навсегда')),
+        );
+        debugPrint("Location permission permanently denied.");
+        return false;
+      }
+
+      return true;
+    }
+  
+  
 
   Future<void> _initSensors() async {
     bool hasPermission = await checkAndRequestLocationPermission();
@@ -174,15 +134,6 @@ class _MainDashboardState extends State<MainDashboard>
         _longitude = pos.longitude;
         _dashboardData["current_location"] =
             "${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}";
-      });
-      LocalDatabase.insertData({
-        "session_id": sessionId,
-        "date_upd": DateTime.now().toIso8601String(),
-        "latitude": pos.latitude,
-        "longitude": pos.longitude,
-        "accel_x": null,
-        "accel_y": null,
-        "accel_z": null,
       });
     });
 
@@ -199,11 +150,13 @@ class _MainDashboardState extends State<MainDashboard>
           "z_threshold": 3.0
         };
       });
+
+      // Insert combined data
       LocalDatabase.insertData({
         "session_id": sessionId,
         "date_upd": DateTime.now().toIso8601String(),
-        "latitude": null,
-        "longitude": null,
+        "latitude": _latitude,
+        "longitude": _longitude,
         "accel_x": event.x,
         "accel_y": event.y,
         "accel_z": event.z,
@@ -211,28 +164,38 @@ class _MainDashboardState extends State<MainDashboard>
     });
   }
 
+  //void _startUploadTimer(BuildContext context) {
   void _startUploadTimer() {
-    _uploadTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
-      final batch = await LocalDatabase.fetchBatchAndClear();
-      if (batch.isEmpty) return;
+  _uploadTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+    debugPrint("таймер");
+    final batch = await LocalDatabase.fetchBatchAndClear();
+    if (batch.isEmpty) {
+      debugPrint("НетДанных");
+      return;
+    }
 
-      final payload = {
-        "session_id": sessionId,
-        "data": batch,
-      };
+    final payload = {
+      "session_id": sessionId,
+      "data": batch,
+    };
+    debugPrint("Данные: ${payload.toString()}");
 
-      try {
-        final response = await http.post(
-          Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(payload),
-        );
-        debugPrint("Upload status: ${response.statusCode}");
-      } catch (e) {
-        debugPrint("Upload failed: $e");
-      }
-    });
-  }
+    try {
+      final response = await http.post(
+        Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(payload),
+      );
+      debugPrint("ОтветСервера: ${response.statusCode}");
+      debugPrint("ОтветСервера: ${response.body}");
+      debugPrint('Payload: ${jsonEncode(payload)}');
+      
+    } catch (e) {
+      debugPrint("Ошибка отправки: $e");
+    }
+  });
+}
+
 
   @override
   void dispose() {
@@ -305,13 +268,27 @@ class _MainDashboardState extends State<MainDashboard>
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final batch = await LocalDatabase.fetchBatchAndClear();
+          debugPrint('Fetched batch: $batch'); // Log the data
+          final message = "Записей: ${batch.length}";
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        },
+        child: const Icon(Icons.bug_report),
+      ),
+      /*floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCalibration,
         child: CustomIconWidget(
           iconName: 'tune',
           color: AppTheme.lightTheme.colorScheme.onSecondary,
           size: 24,
         ),
-      ),
+      ),*/
     );
   }
 
@@ -448,33 +425,40 @@ class LocalDatabase {
 
   static Future<Database> get instance async {
     if (_db != null) return _db!;
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'sensor_data.db');
-    _db = await openDatabase(path, version: 1, onCreate: (db, _) async {
-      await db.execute('''
-        CREATE TABLE sensor_log (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          session_id TEXT,
-          date_upd TEXT,
-          latitude REAL,
-          longitude REAL,
-          accel_x REAL,
-          accel_y REAL,
-          accel_z REAL
-        )
-      ''');
-    });
-    return _db!;
-  }
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'sensor_data.db');
+      debugPrint('Opening database at: $path'); // Add logging
+      _db = await openDatabase(path, version: 1, onCreate: (db, _) async {
+        debugPrint('Creating sensor_log table'); // Add logging
+        await db.execute('''
+          CREATE TABLE sensor_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT,
+            date_upd TEXT,
+            latitude REAL,
+            longitude REAL,
+            accel_x REAL,
+            accel_y REAL,
+            accel_z REAL
+          )
+        ''');
+      });
+      return _db!;
+    }
 
   static Future<void> insertData(Map<String, dynamic> data) async {
-    final db = await instance;
-    await db.insert('sensor_log', data);
+    try {
+      final db = await instance;
+      await db.insert('sensor_log', data);
+      //debugPrint('Inserted data: $data'); // Log successful insertion
+    } catch (e) {
+      debugPrint('Error inserting data: $e'); // Log error
+    }
   }
 
   static Future<List<Map<String, dynamic>>> fetchBatchAndClear() async {
     final db = await instance;
-    final data = await db.query('sensor_log');
+    final data = await db.query('sensor_log', columns: ['date_upd', 'latitude', 'longitude', 'accel_x', 'accel_y', 'accel_z']);
     await db.delete('sensor_log');
     return data;
   }
