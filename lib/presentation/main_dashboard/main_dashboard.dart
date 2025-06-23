@@ -18,6 +18,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
@@ -83,6 +84,8 @@ class _MainDashboardState extends State<MainDashboard>
     });
     
     _tabController = TabController(length: 3, vsync: this);
+    WakelockPlus.enable();
+
 
     _initSensors();    
     WidgetsBinding.instance.addPostFrameCallback((_) {
