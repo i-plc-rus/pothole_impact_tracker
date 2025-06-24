@@ -38,7 +38,7 @@ class SensorVisualizationWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Датчики в реальном времени',
+                  'accelerometer',
                   style: AppTheme.lightTheme.textTheme.titleMedium,
                 ),
               ],
@@ -138,7 +138,7 @@ class SensorVisualizationWidget extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  if (isAboveThreshold)
+                  /*if (isAboveThreshold)
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
@@ -154,7 +154,7 @@ class SensorVisualizationWidget extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
+                    ),*/
                 ],
               ),
               const SizedBox(height: 4),

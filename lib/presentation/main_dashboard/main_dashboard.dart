@@ -318,7 +318,7 @@ class _MainDashboardState extends State<MainDashboard>
             const SizedBox(height: 24),
 
             // Impact Counter
-            ImpactCounterWidget(
+            /*ImpactCounterWidget(
               totalImpacts: _dashboardData["total_impacts"] as int,
               todayImpacts: _dashboardData["today_impacts"] as int,
             ),
@@ -338,7 +338,7 @@ class _MainDashboardState extends State<MainDashboard>
               weeklyData: (_dashboardData["weekly_impacts"] as List)
                   .map((item) => item as Map<String, dynamic>)
                   .toList(),
-            ),
+            ),*/
             const SizedBox(height: 24),
 
             // Sensor Visualization
