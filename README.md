@@ -110,3 +110,30 @@ flutter build ios --release
 - Styled with Material Design
 
 Built with ❤️ on Rocket.new
+
+
+
+/*drop table sensor_events;
+
+CREATE TABLE sensor_events (
+    session_id String,
+    date_upd DateTime64(6),
+    latitude Nullable(Float64),
+    longitude Nullable(Float64),
+    accel_x Nullable(Float64),
+    accel_y Nullable(Float64),
+    accel_z Nullable(Float64),
+    gyroscope_x Nullable(Float64),
+    gyroscope_y Nullable(Float64),
+    gyroscope_z Nullable(Float64),
+    magnetometer_x Nullable(Float64),
+    magnetometer_y Nullable(Float64),
+    magnetometer_z Nullable(Float64)
+) ENGINE = MergeTree()
+ORDER BY (session_id, date_upd);*/
+
+/*truncate table sensor_events;*/
+
+select session_id, min(date_upd), max(date_upd), count(*) FROM sensor_events group by session_id;
+
+select * FROM sensor_events WHERE gyroscope_x > 0.00 order by date_upd  DESC limit 10;
