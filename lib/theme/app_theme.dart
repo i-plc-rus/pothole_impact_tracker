@@ -115,7 +115,7 @@ class AppTheme {
     ),
 
     // Card theme with subtle elevation
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: surfaceLight,
       elevation: 2.0, // Minimal elevation as per design standards
       shadowColor: shadowLight,
@@ -303,7 +303,7 @@ class AppTheme {
     ),
 
     // Tab bar theme for data categories
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: primaryLight,
       unselectedLabelColor: textSecondaryLight,
       indicatorColor: accentLight,
@@ -383,7 +383,7 @@ class AppTheme {
         fontWeight: FontWeight.w400,
       ),
     ),
-    dialogTheme: DialogTheme(backgroundColor: surfaceLight),
+    dialogTheme: DialogThemeData(backgroundColor: surfaceLight),
   );
 
   /// Dark theme optimized for dashboard illumination
@@ -434,7 +434,7 @@ class AppTheme {
     ),
 
     // Card theme with subtle elevation for dark mode
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: surfaceDark,
       elevation: 2.0,
       shadowColor: shadowDark,
@@ -622,7 +622,7 @@ class AppTheme {
     ),
 
     // Tab bar theme for dark mode
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: primaryDark,
       unselectedLabelColor: textSecondaryDark,
       indicatorColor: accentDark,
@@ -702,7 +702,7 @@ class AppTheme {
         fontWeight: FontWeight.w400,
       ),
     ),
-    dialogTheme: DialogTheme(backgroundColor: surfaceDark),
+    dialogTheme: DialogThemeData(backgroundColor: surfaceDark),
   );
 
   /// Helper method to build text theme using Inter and JetBrains Mono fonts

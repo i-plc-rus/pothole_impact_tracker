@@ -28,11 +28,11 @@ class MonitoringStatusWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Мониторинг (v1.1.1)',
+                      'Мониторинг (v1.1.2)',
                       style: AppTheme.lightTheme.textTheme.titleLarge,
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    /*Text(
                       isMonitoring ? 'Активен' : 'Приостановлен',
                       style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                         color: isMonitoring
@@ -40,10 +40,10 @@ class MonitoringStatusWidget extends StatelessWidget {
                             : AppTheme.warningLight,
                         fontWeight: FontWeight.w500,
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
-                Row(
+                /*Row(
                   children: [
                     CustomIconWidget(
                       iconName: 'battery_std',
@@ -58,11 +58,11 @@ class MonitoringStatusWidget extends StatelessWidget {
                       style: AppTheme.lightTheme.textTheme.bodySmall,
                     ),
                   ],
-                ),
+                ),*/
               ],
             ),
-            const SizedBox(height: 20),
-            SizedBox(
+            //const SizedBox(height: 20),
+            /*izedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton.icon(
@@ -86,8 +86,8 @@ class MonitoringStatusWidget extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            if (isMonitoring) ...[
+            ),*/
+            /*if (isMonitoring) ...[
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -109,7 +109,7 @@ class MonitoringStatusWidget extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
+            ],*/
           ],
         ),
       ),
