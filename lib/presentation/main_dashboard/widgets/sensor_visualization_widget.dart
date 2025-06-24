@@ -19,6 +19,12 @@ class SensorVisualizationWidget extends StatelessWidget {
         (sensorData["accelerometer_y"] as num).toDouble();
     final double accelerometerZ =
         (sensorData["accelerometer_z"] as num).toDouble();
+    /*final double gyroscopeX =
+        (sensorData["gyroscope_x"] as num).toDouble();
+    final double gyroscopeY =
+        (sensorData["gyroscope_y"] as num).toDouble();
+    final double gyroscopeZ =
+        (sensorData["gyroscope_z"] as num).toDouble();*/
 
     final double threshold = (sensorData["threshold"] as num).toDouble();
     final double zThreshold = (sensorData["z_threshold"] as num?)?.toDouble() ?? 3.0;
@@ -88,6 +94,9 @@ class SensorVisualizationWidget extends StatelessWidget {
                 ],
               ),
             ),
+            //+++
+            
+            //---
           ],
         ),
       ),

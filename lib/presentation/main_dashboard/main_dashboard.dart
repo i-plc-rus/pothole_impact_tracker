@@ -39,9 +39,20 @@ class _MainDashboardState extends State<MainDashboard>
   double _accelY = 0.0;
   double _accelZ = 0.0;
 
+  double _gyroscopeX = 0.0;
+  double _gyroscopeY = 0.0;
+  double _gyroscopeZ = 0.0;
+
+  double _magnetometerX = 0.0;
+  double _magnetometerY = 0.0;
+  double _magnetometerZ = 0.0;
+
+  
   double? _latitude;
   double? _longitude;
   late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+  late StreamSubscription<GyroscopeEvent> _gyroscopeSubscription;
+  late StreamSubscription<MagnetometerEvent> _magnetometerSubscription;  
   late StreamSubscription<Position> _positionSubscription;
   late Timer _uploadTimer;
 
@@ -64,7 +75,13 @@ class _MainDashboardState extends State<MainDashboard>
       "accelerometer_y": 0.0,
       "accelerometer_z": 0.0,
       "threshold": 2.5,
-      "z_threshold": 3.0
+      "z_threshold": 3.0,
+      "gyroscope_x": 0.0,
+      "gyroscope_y": 0.0,
+      "gyroscope_z": 0.0,
+      "magnetometer_x": 0.0,
+      "magnetometer_y": 0.0,
+      "magnetometer_z": 0.0,
     },
     "weekly_impacts": [
       {"date": "18.06.2025", "count": 12},
@@ -145,6 +162,42 @@ class _MainDashboardState extends State<MainDashboard>
       });
     });
 
+    _gyroscopeSubscription = gyroscopeEventStream().listen((event) {
+      setState(() {
+        _gyroscopeX = event.x;
+        _gyroscopeY = event.y;
+        _gyroscopeZ = event.z;
+        _dashboardData["sensor_data"] = {
+          "accelerometer_x": _accelX,
+          "accelerometer_y": _accelY,
+          "accelerometer_z": _accelZ,
+          "threshold": 2.5,
+          "z_threshold": 3.0,
+          "gyroscope_x": _gyroscopeX,
+          "gyroscope_y": _gyroscopeY,
+          "gyroscope_z": _gyroscopeZ,          
+          "magnetometer_x": _magnetometerX,
+          "magnetometer_y": _magnetometerY,
+          "magnetometer_z": _magnetometerZ,         
+        };
+      });
+       LocalDatabase.insertData({
+        "session_id": sessionId,
+        "date_upd": DateTime.now().toUtc().toIso8601String(),
+        "latitude": _latitude,
+        "longitude": _longitude,
+        "accel_x": _accelX,
+        "accel_y": _accelY,
+        "accel_z": _accelZ,
+        "gyroscope_x": _gyroscopeX,
+        "gyroscope_y": _gyroscopeY,
+        "gyroscope_z": _gyroscopeZ,
+        "magnetometer_x": _magnetometerX,
+        "magnetometer_y": _magnetometerY,
+        "magnetometer_z": _magnetometerZ, 
+      });
+    });
+
     _accelerometerSubscription = accelerometerEventStream().listen((event) {
       setState(() {
         _accelX = event.x;
@@ -155,26 +208,76 @@ class _MainDashboardState extends State<MainDashboard>
           "accelerometer_y": _accelY,
           "accelerometer_z": _accelZ,
           "threshold": 2.5,
-          "z_threshold": 3.0
+          "z_threshold": 3.0,
+          "gyroscope_x": _gyroscopeX,
+          "gyroscope_y": _gyroscopeY,
+          "gyroscope_z": _gyroscopeZ,          
+          "magnetometer_x": _magnetometerX,
+          "magnetometer_y": _magnetometerY,
+          "magnetometer_z": _magnetometerZ,          
         };
       });
 
+      
       // Insert combined data
       LocalDatabase.insertData({
         "session_id": sessionId,
         "date_upd": DateTime.now().toUtc().toIso8601String(),
         "latitude": _latitude,
         "longitude": _longitude,
-        "accel_x": event.x,
-        "accel_y": event.y,
-        "accel_z": event.z,
+        "accel_x": _accelX,
+        "accel_y": _accelY,
+        "accel_z": _accelZ,
+        "gyroscope_x": _gyroscopeX,
+        "gyroscope_y": _gyroscopeY,
+        "gyroscope_z": _gyroscopeZ,
+        "magnetometer_x": _magnetometerX,
+        "magnetometer_y": _magnetometerY,
+        "magnetometer_z": _magnetometerZ, 
       });
     });
+
+    _magnetometerSubscription = magnetometerEventStream().listen((event) {
+      setState(() {
+        _magnetometerX = event.x;
+        _magnetometerY = event.y;
+        _magnetometerZ = event.z;
+        _dashboardData["sensor_data"] = {
+          "accelerometer_x": _accelX,
+          "accelerometer_y": _accelY,
+          "accelerometer_z": _accelZ,
+          "threshold": 2.5,
+          "z_threshold": 3.0,
+          "gyroscope_x": _gyroscopeX,
+          "gyroscope_y": _gyroscopeY,
+          "gyroscope_z": _gyroscopeZ,          
+          "magnetometer_x": _magnetometerX,
+          "magnetometer_y": _magnetometerY,
+          "magnetometer_z": _magnetometerZ,           
+        };
+      });
+       LocalDatabase.insertData({
+        "session_id": sessionId,
+        "date_upd": DateTime.now().toUtc().toIso8601String(),
+        "latitude": _latitude,
+        "longitude": _longitude,
+        "accel_x": _accelX,
+        "accel_y": _accelY,
+        "accel_z": _accelZ,
+        "gyroscope_x": _gyroscopeX,
+        "gyroscope_y": _gyroscopeY,
+        "gyroscope_z": _gyroscopeZ,
+        "magnetometer_x": _magnetometerX,
+        "magnetometer_y": _magnetometerY,
+        "magnetometer_z": _magnetometerZ,          
+      });
+    });
+
   }
 
   //void _startUploadTimer(BuildContext context) {
   void _startUploadTimer() {
-  _uploadTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+  _uploadTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
     debugPrint("таймер");
     final batch = await LocalDatabase.fetchBatchAndClear();
     if (batch.isEmpty) {
@@ -209,6 +312,8 @@ class _MainDashboardState extends State<MainDashboard>
   void dispose() {
     _tabController.dispose();
     _accelerometerSubscription.cancel();
+    _gyroscopeSubscription.cancel();
+    _magnetometerSubscription.cancel();
     _positionSubscription.cancel();
     super.dispose();
   }
@@ -255,9 +360,9 @@ class _MainDashboardState extends State<MainDashboard>
               child: TabBar(
                 controller: _tabController,
                 tabs: const [
-                  Tab(text: 'Панель'),
-                  Tab(text: 'История'),
-                  Tab(text: 'Настройки'),
+                  Tab(text: 'Датчики'),
+                  /*Tab(text: 'История'),
+                  Tab(text: 'Настройки'),*/
                 ],
               ),
             ),
@@ -447,7 +552,13 @@ class LocalDatabase {
             longitude REAL,
             accel_x REAL,
             accel_y REAL,
-            accel_z REAL
+            accel_z REAL,
+            gyroscope_x REAL,
+            gyroscope_y REAL,
+            gyroscope_z REAL,
+            magnetometer_x REAL,
+            magnetometer_y REAL,
+            magnetometer_z REAL
           )
         ''');
       });
@@ -466,7 +577,7 @@ class LocalDatabase {
 
   static Future<List<Map<String, dynamic>>> fetchBatchAndClear() async {
     final db = await instance;
-    final data = await db.query('sensor_log', columns: ['date_upd', 'latitude', 'longitude', 'accel_x', 'accel_y', 'accel_z']);
+    final data = await db.query('sensor_log', columns: ['date_upd', 'latitude', 'longitude', 'accel_x', 'accel_y', 'accel_z','gyroscope_x', 'gyroscope_y', 'gyroscope_z','magnetometer_x', 'magnetometer_y', 'magnetometer_z']);
     await db.delete('sensor_log');
     return data;
   }
