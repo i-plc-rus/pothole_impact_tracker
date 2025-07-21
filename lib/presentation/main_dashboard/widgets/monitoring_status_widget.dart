@@ -28,11 +28,11 @@ class MonitoringStatusWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Мониторинг (v1.1.2)',
+                      'Мониторинг (v1.1.3)',
                       style: AppTheme.lightTheme.textTheme.titleLarge,
                     ),
                     const SizedBox(height: 4),
-                    /*Text(
+                    Text(
                       isMonitoring ? 'Активен' : 'Приостановлен',
                       style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                         color: isMonitoring
@@ -40,7 +40,7 @@ class MonitoringStatusWidget extends StatelessWidget {
                             : AppTheme.warningLight,
                         fontWeight: FontWeight.w500,
                       ),
-                    ),*/
+                    ),
                   ],
                 ),
                 /*Row(
@@ -61,8 +61,8 @@ class MonitoringStatusWidget extends StatelessWidget {
                 ),*/
               ],
             ),
-            //const SizedBox(height: 20),
-            /*izedBox(
+            const SizedBox(height: 20),
+            SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton.icon(
@@ -86,7 +86,7 @@ class MonitoringStatusWidget extends StatelessWidget {
                   ),
                 ),
               ),
-            ),*/
+            ),
             /*if (isMonitoring) ...[
               const SizedBox(height: 12),
               Row(

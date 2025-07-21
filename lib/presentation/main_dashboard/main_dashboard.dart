@@ -50,10 +50,10 @@ class _MainDashboardState extends State<MainDashboard>
   
   double? _latitude;
   double? _longitude;
-  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
-  late StreamSubscription<GyroscopeEvent> _gyroscopeSubscription;
-  late StreamSubscription<MagnetometerEvent> _magnetometerSubscription;  
-  late StreamSubscription<Position> _positionSubscription;
+  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
+  StreamSubscription<GyroscopeEvent>? _gyroscopeSubscription;
+  StreamSubscription<MagnetometerEvent>? _magnetometerSubscription;  
+  StreamSubscription<Position>? _positionSubscription;
   late Timer _uploadTimer;
 
   //final String sessionId = const Uuid().v4();
@@ -149,6 +149,13 @@ class _MainDashboardState extends State<MainDashboard>
   Future<void> _initSensors() async {
     bool hasPermission = await checkAndRequestLocationPermission();
     if (!hasPermission) return;
+
+    if (_accelerometerSubscription != null ||
+        _gyroscopeSubscription != null ||
+        _magnetometerSubscription != null ||
+        _positionSubscription != null) {
+      return;
+    }
 
     _positionSubscription = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
@@ -275,34 +282,63 @@ class _MainDashboardState extends State<MainDashboard>
 
   }
 
+  void _stopSensors() {
+    _accelerometerSubscription?.cancel();
+    _gyroscopeSubscription?.cancel();
+    _magnetometerSubscription?.cancel();
+    _positionSubscription?.cancel();
+
+    _accelerometerSubscription = null;
+    _gyroscopeSubscription = null;
+    _magnetometerSubscription = null;
+    _positionSubscription = null;
+}
+
+
   //void _startUploadTimer(BuildContext context) {
   void _startUploadTimer() {
-  _uploadTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
-    debugPrint("таймер");
-    final batch = await LocalDatabase.fetchBatchAndClear();
-    if (batch.isEmpty) {
-      debugPrint("НетДанных");
+  _uploadTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+    debugPrint("Таймер загрузки…");
+
+    final allData = await LocalDatabase.fetchBatch();
+    if (allData.isEmpty) {
+      debugPrint("Нет данных для отправки");
       return;
     }
 
-    final payload = {
-      "session_id": sessionId,
-      "data": batch,
-    };
-    debugPrint("Данные: ${payload.toString()}");
-
-    try {
-      final response = await http.post(
-        Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(payload),
+    const batchSize = 1000;
+    for (var i = 0; i < allData.length; i += batchSize) {
+      final chunk = allData.sublist(
+        i,
+        (i + batchSize > allData.length) ? allData.length : i + batchSize,
       );
-      debugPrint("ОтветСервера: ${response.statusCode}");
-      debugPrint("ОтветСервера: ${response.body}");
-      debugPrint('Payload: ${jsonEncode(payload)}');
-      
-    } catch (e) {
-      debugPrint("Ошибка отправки: $e");
+
+      final payload = {
+        "session_id": sessionId,
+        "data": chunk,
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(payload),
+        );
+
+        debugPrint("Ответ сервера: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          final idsToDelete = chunk.map((e) => e['id'] as int).toList();
+          await LocalDatabase.deleteBatch(idsToDelete);
+        } else {
+          debugPrint("Ошибка ответа: ${response.body}");
+          break; // остановись, чтобы не удалять последующие, если API не принимает
+        }
+
+      } catch (e) {
+        debugPrint("Ошибка отправки: $e");
+        break; // остановись, если сеть не работает
+      }
     }
   });
 }
@@ -311,10 +347,10 @@ class _MainDashboardState extends State<MainDashboard>
   @override
   void dispose() {
     _tabController.dispose();
-    _accelerometerSubscription.cancel();
-    _gyroscopeSubscription.cancel();
-    _magnetometerSubscription.cancel();
-    _positionSubscription.cancel();
+    _accelerometerSubscription?.cancel();
+    _gyroscopeSubscription?.cancel();
+    _magnetometerSubscription?.cancel();
+    _positionSubscription?.cancel();
     super.dispose();
   }
 
@@ -341,7 +377,13 @@ class _MainDashboardState extends State<MainDashboard>
       _isMonitoring = !_isMonitoring;
       _dashboardData["monitoring_status"] = _isMonitoring ? "active" : "paused";
     });
-  }
+   
+    if (_isMonitoring) {
+      _initSensors();
+    } else {
+      _stopSensors();
+    }
+    }
 
   void _navigateToCalibration() {
     Navigator.pushNamed(context as BuildContext, '/settings-screen');
@@ -382,7 +424,7 @@ class _MainDashboardState extends State<MainDashboard>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final batch = await LocalDatabase.fetchBatchAndClear();
+          final batch = await LocalDatabase.fetchBatch();
           debugPrint('Fetched batch: $batch'); // Log the data
           final message = "Записей: ${batch.length}";
           ScaffoldMessenger.of(context).showSnackBar(
@@ -575,11 +617,23 @@ class LocalDatabase {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> fetchBatchAndClear() async {
+  static Future<List<Map<String, dynamic>>> fetchBatch() async {
     final db = await instance;
-    final data = await db.query('sensor_log', columns: ['date_upd', 'latitude', 'longitude', 'accel_x', 'accel_y', 'accel_z','gyroscope_x', 'gyroscope_y', 'gyroscope_z','magnetometer_x', 'magnetometer_y', 'magnetometer_z']);
-    await db.delete('sensor_log');
+    final data = await db.query('sensor_log', columns: [
+      'id',
+      'date_upd', 'latitude', 'longitude',
+      'accel_x', 'accel_y', 'accel_z',
+      'gyroscope_x', 'gyroscope_y', 'gyroscope_z',
+      'magnetometer_x', 'magnetometer_y', 'magnetometer_z'
+    ]);
     return data;
+  }
+
+  static Future<void> deleteBatch(List<int> ids) async {
+    if (ids.isEmpty) return;
+    final db = await instance;
+    final idList = ids.join(','); // '1,2,3'
+    await db.rawDelete('DELETE FROM sensor_log WHERE id IN ($idList)');
   }
 }
 

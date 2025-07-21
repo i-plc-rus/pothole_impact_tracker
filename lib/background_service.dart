@@ -39,23 +39,46 @@ void onStart(ServiceInstance service) {
   Timer.periodic(const Duration(seconds: 10), (_) async {
     if (sessionId == null) return;
 
-    final batch = await LocalDatabase.fetchBatchAndClear();
-    if (batch.isEmpty) return;
-
-    final payload = {
-      "session_id": sessionId,
-      "data": batch,
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(payload),
-      );
-      print("BG Upload: ${response.statusCode}");
-    } catch (e) {
-      print("BG Error: $e");
+    final allData = await LocalDatabase.fetchBatch();
+    if (allData.isEmpty) {
+      debugPrint("Нет данных для отправки");
+      return;
     }
+
+    const batchSize = 1000;
+    for (var i = 0; i < allData.length; i += batchSize) {
+      final chunk = allData.sublist(
+        i,
+        (i + batchSize > allData.length) ? allData.length : i + batchSize,
+      );
+
+      final payload = {
+        "session_id": sessionId,
+        "data": chunk,
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(payload),
+        );
+
+        debugPrint("Ответ сервера: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          final idsToDelete = chunk.map((e) => e['id'] as int).toList();
+          await LocalDatabase.deleteBatch(idsToDelete);
+        } else {
+          debugPrint("Ошибка ответа: ${response.body}");
+          break; // остановись, чтобы не удалять последующие, если API не принимает
+        }
+
+      } catch (e) {
+        debugPrint("Ошибка отправки: $e");
+        break; // остановись, если сеть не работает
+      }
+    }
+
   });
 }
