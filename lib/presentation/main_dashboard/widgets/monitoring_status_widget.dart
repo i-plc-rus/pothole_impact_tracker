@@ -28,7 +28,7 @@ class MonitoringStatusWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Мониторинг (v1.1.3)',
+                      'Мониторинг (v1.1.4)',
                       style: AppTheme.lightTheme.textTheme.titleLarge,
                     ),
                     const SizedBox(height: 4),

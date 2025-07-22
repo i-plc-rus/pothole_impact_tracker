@@ -159,7 +159,10 @@ class _MainDashboardState extends State<MainDashboard>
 
     _positionSubscription = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high, distanceFilter: 5),
+            accuracy: LocationAccuracy.best, // Максимально возможная точность
+            distanceFilter: 0,               // Обновления при любом смещении
+            timeLimit: null,                 // Без ограничения по времени
+          ),
     ).listen((Position pos) {
       setState(() {
         _latitude = pos.latitude;
