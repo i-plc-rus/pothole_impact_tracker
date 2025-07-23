@@ -5,20 +5,18 @@ import 'package:geolocator/geolocator.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/app_export.dart';
-import './widgets/impact_chart_widget.dart';
-import './widgets/impact_counter_widget.dart';
 import './widgets/location_status_widget.dart';
 import './widgets/monitoring_status_widget.dart';
 import './widgets/sensor_visualization_widget.dart';
-import './widgets/statistics_cards_widget.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:path/path.dart';
 
 class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
@@ -417,8 +415,8 @@ class _MainDashboardState extends State<MainDashboard>
                 controller: _tabController,
                 children: [
                   _buildDashboardTab(),
-                  _buildHistoryTab(),
-                  _buildSettingsTab(),
+                  //_buildHistoryTab(),
+                  //_buildSettingsTab(),
                 ],
               ),
             ),
@@ -467,28 +465,7 @@ class _MainDashboardState extends State<MainDashboard>
             ),
             const SizedBox(height: 24),
 
-            // Impact Counter
-            /*ImpactCounterWidget(
-              totalImpacts: _dashboardData["total_impacts"] as int,
-              todayImpacts: _dashboardData["today_impacts"] as int,
-            ),
-            const SizedBox(height: 24),
-
-            // Statistics Cards
-            StatisticsCardsWidget(
-              todayImpacts: _dashboardData["today_impacts"] as int,
-              severeImpacts: _dashboardData["severe_impacts"] as int,
-              distanceTraveled: _dashboardData["distance_traveled"] as double,
-              averageSpeed: _dashboardData["average_speed"] as double,
-            ),
-            const SizedBox(height: 24),
-
-            // Impact Chart
-            ImpactChartWidget(
-              weeklyData: (_dashboardData["weekly_impacts"] as List)
-                  .map((item) => item as Map<String, dynamic>)
-                  .toList(),
-            ),*/
+            
             const SizedBox(height: 24),
 
             // Sensor Visualization
@@ -509,73 +486,7 @@ class _MainDashboardState extends State<MainDashboard>
     );
   }
 
-  Widget _buildHistoryTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CustomIconWidget(
-            iconName: 'history',
-            color: AppTheme.lightTheme.colorScheme.secondary,
-            size: 64,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'История ударов',
-            style: AppTheme.lightTheme.textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Здесь будет отображаться\nистория зафиксированных ударов',
-            textAlign: TextAlign.center,
-            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () =>
-                Navigator.pushNamed(context as BuildContext, '/impact-history'),
-            child: const Text('Открыть историю'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingsTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CustomIconWidget(
-            iconName: 'settings',
-            color: AppTheme.lightTheme.colorScheme.secondary,
-            size: 64,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Настройки',
-            style: AppTheme.lightTheme.textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Калибровка датчиков\nи настройки приложения',
-            textAlign: TextAlign.center,
-            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => Navigator.pushNamed(
-                context as BuildContext, '/settings-screen'),
-            child: const Text('Открыть настройки'),
-          ),
-        ],
-      ),
-    );
-  }
+  
 }
 
 class LocalDatabase {

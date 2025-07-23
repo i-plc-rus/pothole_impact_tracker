@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pothole_impact_tracker/background_service.dart';
-import 'package:pothole_impact_tracker/presentation/main_dashboard/main_dashboard.dart';
+//import 'package:pothole_impact_tracker/background_service.dart';
+//import 'package:pothole_impact_tracker/presentation/main_dashboard/main_dashboard.dart';
 import 'package:sizer/sizer.dart';
 
 import '../widgets/custom_error_widget.dart';
@@ -9,9 +9,9 @@ import 'core/app_export.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final sessionId = await SessionManager.getSessionId();
+  //final sessionId = await SessionManager.getSessionId();
   
-  await initializeService(sessionId);
+  //await initializeService(sessionId);
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return CustomErrorWidget(
       errorDetails: details,

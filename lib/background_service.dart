@@ -17,8 +17,8 @@ Future<void> initializeService(String sessionId) async {
       onStart: onStart,
       isForegroundMode: true,
       autoStart: true,
-      initialNotificationTitle: 'Слежение активно',
-      initialNotificationContent: 'Сбор данных запущен',
+      initialNotificationTitle: 'Сбор телеметрии',
+      initialNotificationContent: 'Сбор данных для телеметрии запущен',
     ),
     iosConfiguration: IosConfiguration(),
   );
