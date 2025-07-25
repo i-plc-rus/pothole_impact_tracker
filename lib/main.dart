@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-//import 'package:pothole_impact_tracker/background_service.dart';
-//import 'package:pothole_impact_tracker/presentation/main_dashboard/main_dashboard.dart';
+//import 'package:smart_road/background_service.dart';
+//import 'package:smart_road/presentation/main_dashboard/main_dashboard.dart';
 import 'package:sizer/sizer.dart';
 
 import '../widgets/custom_error_widget.dart';
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Sizer(builder: (context, orientation, screenType) {
       return MaterialApp(
-        title: 'pothole_impact_tracker',
+        title: 'smart_road',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,

@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
     return Sizer(builder: (context, orientation, screenType) {
       return MaterialApp(
 
-        title: 'pothole_impact_tracker',
+        title: 'smart_road',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,

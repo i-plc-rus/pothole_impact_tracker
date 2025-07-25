@@ -32,7 +32,7 @@ project.getTasks().withType(JavaCompile) {
 android {
     compileSdkVersion flutter.compileSdkVersion    
 
-    //namespace = "com.pothole_impact_tracker.app"
+    //namespace = "com.smart_road.app"
     //compileSdk = flutter.compileSdkVersion
     //compileSdk = 33
     //ndkVersion = flutter.ndkVersion
@@ -51,7 +51,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.pothole_impact_tracker.app"
+        applicationId "com.smart_road.app"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
@@ -83,7 +83,7 @@ android {
             //signingConfig signingConfigs.release            
         }
     }
-    namespace "com.pothole_impact_tracker.app"
+    namespace "com.smart_road.app"
     lint {
         disable 'InvalidPackage'
     }

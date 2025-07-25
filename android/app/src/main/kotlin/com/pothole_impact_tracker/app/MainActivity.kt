@@ -1,4 +1,4 @@
-package com.pothole_impact_tracker.app
+package com.smart_road.app
 
 import io.flutter.embedding.android.FlutterActivity
 
