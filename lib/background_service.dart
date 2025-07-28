@@ -36,7 +36,7 @@ void onStart(ServiceInstance service) {
     sessionId = event?['sessionId'];
   });
 
-  Timer.periodic(const Duration(seconds: 10), (_) async {
+  /*Timer.periodic(const Duration(seconds: 10), (_) async {  
     if (sessionId == null) return;
 
     final allData = await LocalDatabase.fetchBatch();
@@ -80,5 +80,5 @@ void onStart(ServiceInstance service) {
       }
     }
 
-  });
+  });*/
 }

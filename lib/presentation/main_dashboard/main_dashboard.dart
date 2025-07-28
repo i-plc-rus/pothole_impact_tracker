@@ -52,7 +52,11 @@ class _MainDashboardState extends State<MainDashboard>
   StreamSubscription<GyroscopeEvent>? _gyroscopeSubscription;
   StreamSubscription<MagnetometerEvent>? _magnetometerSubscription;  
   StreamSubscription<Position>? _positionSubscription;
-  late Timer _uploadTimer;
+  //late Timer _uploadTimer;
+  late Timer _uploadTimerLocation;  
+  late Timer _uploadTimerAccelerometer;
+  late Timer _uploadTimerGyroscope;
+  late Timer _uploadTimerMagnetometer;
 
   //final String sessionId = const Uuid().v4();
   late final String sessionId;
@@ -91,22 +95,23 @@ class _MainDashboardState extends State<MainDashboard>
 
   @override
   void initState() {
-    super.initState();
+    super.initState();    
     SessionManager.getSessionId().then((id) {
       sessionId = id;
-      _initSensors();
-      _startUploadTimer();
+      _initSensors();      
     });
     
     _tabController = TabController(length: 3, vsync: this);
     WakelockPlus.enable();
+    
 
-
-    _initSensors();    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-    //_startUploadTimer(context as BuildContext);
-      _startUploadTimer();
-  });
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {    
+      _startUploadTimerLocation();
+      _startUploadTimerAccelerometer();
+      _startUploadTimerGyroscope();
+      _startUploadTimerMagnetometer();
+    });
   }
 
   Future<bool> checkAndRequestLocationPermission() async {
@@ -189,20 +194,12 @@ class _MainDashboardState extends State<MainDashboard>
           "magnetometer_z": _magnetometerZ,         
         };
       });
-       LocalDatabase.insertData({
+       LocalDatabase.insertGyroscope({
         "session_id": sessionId,
         "date_upd": DateTime.now().toUtc().toIso8601String(),
-        "latitude": _latitude,
-        "longitude": _longitude,
-        "accel_x": _accelX,
-        "accel_y": _accelY,
-        "accel_z": _accelZ,
         "gyroscope_x": _gyroscopeX,
         "gyroscope_y": _gyroscopeY,
-        "gyroscope_z": _gyroscopeZ,
-        "magnetometer_x": _magnetometerX,
-        "magnetometer_y": _magnetometerY,
-        "magnetometer_z": _magnetometerZ, 
+        "gyroscope_z": _gyroscopeZ,        
       });
     });
 
@@ -228,20 +225,12 @@ class _MainDashboardState extends State<MainDashboard>
 
       
       // Insert combined data
-      LocalDatabase.insertData({
+      LocalDatabase.insertAccelerometer({
         "session_id": sessionId,
         "date_upd": DateTime.now().toUtc().toIso8601String(),
-        "latitude": _latitude,
-        "longitude": _longitude,
         "accel_x": _accelX,
         "accel_y": _accelY,
-        "accel_z": _accelZ,
-        "gyroscope_x": _gyroscopeX,
-        "gyroscope_y": _gyroscopeY,
-        "gyroscope_z": _gyroscopeZ,
-        "magnetometer_x": _magnetometerX,
-        "magnetometer_y": _magnetometerY,
-        "magnetometer_z": _magnetometerZ, 
+        "accel_z": _accelZ,        
       });
     });
 
@@ -264,17 +253,9 @@ class _MainDashboardState extends State<MainDashboard>
           "magnetometer_z": _magnetometerZ,           
         };
       });
-       LocalDatabase.insertData({
+       LocalDatabase.insertMagnetometer({
         "session_id": sessionId,
-        "date_upd": DateTime.now().toUtc().toIso8601String(),
-        "latitude": _latitude,
-        "longitude": _longitude,
-        "accel_x": _accelX,
-        "accel_y": _accelY,
-        "accel_z": _accelZ,
-        "gyroscope_x": _gyroscopeX,
-        "gyroscope_y": _gyroscopeY,
-        "gyroscope_z": _gyroscopeZ,
+        "date_upd": DateTime.now().toUtc().toIso8601String(),        
         "magnetometer_x": _magnetometerX,
         "magnetometer_y": _magnetometerY,
         "magnetometer_z": _magnetometerZ,          
@@ -296,12 +277,12 @@ class _MainDashboardState extends State<MainDashboard>
 }
 
 
-  //void _startUploadTimer(BuildContext context) {
-  void _startUploadTimer() {
-  _uploadTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-    debugPrint("Таймер загрузки…");
+  void _startUploadTimerLocation() {
+   if (_uploadTimerLocation != null && _uploadTimerLocation!.isActive) return;
+  _uploadTimerLocation = Timer.periodic(const Duration(seconds: 1), (_) async {
+    //debugPrint("Таймер загрузки…");
 
-    final allData = await LocalDatabase.fetchBatch();
+    final allData = await LocalDatabase.fetchLocationBatch();
     if (allData.isEmpty) {
       debugPrint("Нет данных для отправки");
       return;
@@ -321,7 +302,7 @@ class _MainDashboardState extends State<MainDashboard>
 
       try {
         final response = await http.post(
-          Uri.parse("https://functions.yandexcloud.net/d4eb4avo8k55c98u2eh9"),
+          Uri.parse("https://functions.yandexcloud.net/d4e729sngmomsjms6dpn"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(payload),
         );
@@ -330,7 +311,59 @@ class _MainDashboardState extends State<MainDashboard>
 
         if (response.statusCode == 200) {
           final idsToDelete = chunk.map((e) => e['id'] as int).toList();
-          await LocalDatabase.deleteBatch(idsToDelete);
+          await LocalDatabase.deleteLocationBatch(idsToDelete);
+        } else {
+          debugPrint("Ошибка ответа: ${response.body}");
+          break; // остановись, чтобы не удалять последующие, если API не принимает
+        }
+
+      } catch (e) {
+        debugPrint("Ошибка отправки: $e");
+        break; // остановись, если сеть не работает
+      }
+    }
+  });
+}
+  /*_startUploadTimerLocation();
+      _startUploadTimerAccelerometer();
+      _startUploadTimerGyroscope();
+      _startUploadTimerMagnetometer();*/
+
+void _startUploadTimerAccelerometer() {
+  if (_uploadTimerAccelerometer != null && _uploadTimerAccelerometer!.isActive) return;
+  _uploadTimerAccelerometer = Timer.periodic(const Duration(seconds: 1), (_) async {
+    //debugPrint("Таймер загрузки…");
+
+    final allData = await LocalDatabase.fetchAccelerometerBatch();
+    if (allData.isEmpty) {
+      debugPrint("Нет данных для отправки");
+      return;
+    }
+
+    const batchSize = 1000;
+    for (var i = 0; i < allData.length; i += batchSize) {
+      final chunk = allData.sublist(
+        i,
+        (i + batchSize > allData.length) ? allData.length : i + batchSize,
+      );
+
+      final payload = {
+        "session_id": sessionId,
+        "data": chunk,
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse("https://functions.yandexcloud.net/d4emkf3qdd4j8bgl8l49"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(payload),
+        );
+
+        debugPrint("Ответ сервера: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          final idsToDelete = chunk.map((e) => e['id'] as int).toList();
+          await LocalDatabase.deleteAccelerometerBatch(idsToDelete);
         } else {
           debugPrint("Ошибка ответа: ${response.body}");
           break; // остановись, чтобы не удалять последующие, если API не принимает
@@ -344,6 +377,102 @@ class _MainDashboardState extends State<MainDashboard>
   });
 }
 
+void _startUploadTimerGyroscope() {
+  if (_uploadTimerGyroscope != null && _uploadTimerGyroscope!.isActive) return;
+  _uploadTimerGyroscope = Timer.periodic(const Duration(seconds: 1), (_) async {
+    //debugPrint("Таймер загрузки…");
+
+    final allData = await LocalDatabase.fetchGyroscopeBatch();
+    if (allData.isEmpty) {
+      debugPrint("Нет данных для отправки");
+      return;
+    }
+
+    const batchSize = 1000;
+    for (var i = 0; i < allData.length; i += batchSize) {
+      final chunk = allData.sublist(
+        i,
+        (i + batchSize > allData.length) ? allData.length : i + batchSize,
+      );
+
+      final payload = {
+        "session_id": sessionId,
+        "data": chunk,
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse("https://functions.yandexcloud.net/d4e34tf4209tbooi34g8"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(payload),
+        );
+
+        debugPrint("Ответ сервера: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          final idsToDelete = chunk.map((e) => e['id'] as int).toList();
+          await LocalDatabase.deleteGyroscopeBatch(idsToDelete);
+        } else {
+          debugPrint("Ошибка ответа: ${response.body}");
+          break; // остановись, чтобы не удалять последующие, если API не принимает
+        }
+
+      } catch (e) {
+        debugPrint("Ошибка отправки: $e");
+        break; // остановись, если сеть не работает
+      }
+    }
+  });
+}
+
+
+void _startUploadTimerMagnetometer() {
+  if (_uploadTimerMagnetometer != null && _uploadTimerMagnetometer!.isActive) return;
+  _uploadTimerMagnetometer = Timer.periodic(const Duration(seconds: 1), (_) async {
+    //debugPrint("Таймер загрузки…");
+
+    final allData = await LocalDatabase.fetchMagnetometerBatch();
+    if (allData.isEmpty) {
+      debugPrint("Нет данных для отправки");
+      return;
+    }
+
+    const batchSize = 1000;
+    for (var i = 0; i < allData.length; i += batchSize) {
+      final chunk = allData.sublist(
+        i,
+        (i + batchSize > allData.length) ? allData.length : i + batchSize,
+      );
+
+      final payload = {
+        "session_id": sessionId,
+        "data": chunk,
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse("https://functions.yandexcloud.net/d4e75bmf64h4r2v986fq"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(payload),
+        );
+
+        debugPrint("Ответ сервера: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          final idsToDelete = chunk.map((e) => e['id'] as int).toList();
+          await LocalDatabase.deleteMagnetometerBatch(idsToDelete);
+        } else {
+          debugPrint("Ошибка ответа: ${response.body}");
+          break; // остановись, чтобы не удалять последующие, если API не принимает
+        }
+
+      } catch (e) {
+        debugPrint("Ошибка отправки: $e");
+        break; // остановись, если сеть не работает
+      }
+    }
+  });
+}
 
   @override
   void dispose() {
@@ -425,7 +554,8 @@ class _MainDashboardState extends State<MainDashboard>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final batch = await LocalDatabase.fetchBatch();
+          debugPrint('debug'); // Log the data
+          /*final batch = await LocalDatabase.fetchBatch();
           debugPrint('Fetched batch: $batch'); // Log the data
           final message = "Записей: ${batch.length}";
           ScaffoldMessenger.of(context).showSnackBar(
@@ -433,7 +563,7 @@ class _MainDashboardState extends State<MainDashboard>
               content: Text(message),
               duration: const Duration(seconds: 4),
             ),
-          );
+          );*/
         },
         child: const Icon(Icons.bug_report),
       ),
@@ -494,61 +624,117 @@ class LocalDatabase {
 
   static Future<Database> get instance async {
     if (_db != null) return _db!;
-      final dbPath = await getDatabasesPath();
-      final path = join(dbPath, 'sensor_data.db');
-      debugPrint('Opening database at: $path'); // Add logging
-      _db = await openDatabase(path, version: 1, onCreate: (db, _) async {
-        debugPrint('Creating sensor_log table'); // Add logging
-        await db.execute('''
-          CREATE TABLE sensor_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_id TEXT,
-            date_upd TEXT,
-            latitude REAL,
-            longitude REAL,
-            accel_x REAL,
-            accel_y REAL,
-            accel_z REAL,
-            gyroscope_x REAL,
-            gyroscope_y REAL,
-            gyroscope_z REAL,
-            magnetometer_x REAL,
-            magnetometer_y REAL,
-            magnetometer_z REAL
-          )
-        ''');
-      });
-      return _db!;
-    }
-
-  static Future<void> insertData(Map<String, dynamic> data) async {
-    try {
-      final db = await instance;
-      await db.insert('sensor_log', data);
-      //debugPrint('Inserted data: $data'); // Log successful insertion
-    } catch (e) {
-      debugPrint('Error inserting data: $e'); // Log error
-    }
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'sensor_data.db');
+    _db = await openDatabase(path, version: 1, onCreate: (db, _) async {
+      await db.execute('''
+        CREATE TABLE accelerometer_data (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT,
+          date_upd TEXT,
+          x REAL,
+          y REAL,
+          z REAL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE gyroscope_data (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT,
+          date_upd TEXT,
+          x REAL,
+          y REAL,
+          z REAL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE magnetometer_data (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT,
+          date_upd TEXT,          
+          x REAL,
+          y REAL,
+          z REAL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE location_data (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT,
+          date_upd TEXT,
+          latitude REAL,
+          longitude REAL,
+        )
+      ''');
+      
+    });
+    return _db!;
   }
 
-  static Future<List<Map<String, dynamic>>> fetchBatch() async {
+  static Future<void> insertAccelerometer(Map<String, dynamic> data) async {
     final db = await instance;
-    final data = await db.query('sensor_log', columns: [
-      'id',
-      'date_upd', 'latitude', 'longitude',
-      'accel_x', 'accel_y', 'accel_z',
-      'gyroscope_x', 'gyroscope_y', 'gyroscope_z',
-      'magnetometer_x', 'magnetometer_y', 'magnetometer_z'
-    ]);
-    return data;
+    await db.insert('accelerometer_data', data);
   }
 
-  static Future<void> deleteBatch(List<int> ids) async {
+  static Future<void> insertGyroscope(Map<String, dynamic> data) async {
+    final db = await instance;
+    await db.insert('gyroscope_data', data);
+  }
+
+  static Future<void> insertMagnetometer(Map<String, dynamic> data) async {
+    final db = await instance;
+    await db.insert('magnetometer_data', data);
+  }
+  static Future<void> insertLocation(Map<String, dynamic> data) async {
+    final db = await instance;
+    await db.insert('location_data', data);
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchAccelerometerBatch() async {
+    final db = await instance;
+    return db.query('accelerometer_data');
+  }
+  static Future<List<Map<String, dynamic>>> fetchGyroscopeBatch() async {
+    final db = await instance;
+    return db.query('gyroscope_data');
+  }
+  static Future<List<Map<String, dynamic>>> fetchMagnetometerBatch() async {
+    final db = await instance;
+    return db.query('magnetometer_data');
+  }
+  static Future<List<Map<String, dynamic>>> fetchLocationBatch() async {
+    final db = await instance;
+    return db.query('location_data');
+  }
+
+  static Future<void> deleteAccelerometerBatch(List<int> ids) async {
     if (ids.isEmpty) return;
     final db = await instance;
-    final idList = ids.join(','); // '1,2,3'
-    await db.rawDelete('DELETE FROM sensor_log WHERE id IN ($idList)');
+    final idList = ids.join(',');
+    await db.rawDelete('DELETE FROM accelerometer_data WHERE id IN ($idList)');
   }
+
+  static Future<void> deleteGyroscopeBatch(List<int> ids) async {
+    if (ids.isEmpty) return;
+    final db = await instance;
+    final idList = ids.join(',');
+    await db.rawDelete('DELETE FROM gyroscope_data WHERE id IN ($idList)');
+  }
+
+  static Future<void> deleteMagnetometerBatch(List<int> ids) async {
+    if (ids.isEmpty) return;
+    final db = await instance;
+    final idList = ids.join(',');
+    await db.rawDelete('DELETE FROM magnetometer_data WHERE id IN ($idList)');
+  }
+
+  static Future<void> deleteLocationBatch(List<int> ids) async {
+    if (ids.isEmpty) return;
+    final db = await instance;
+    final idList = ids.join(',');
+    await db.rawDelete('DELETE FROM location_data WHERE id IN ($idList)');
+  }
+
 }
 
 

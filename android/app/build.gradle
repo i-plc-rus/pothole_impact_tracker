@@ -21,7 +21,7 @@ if (flutterVersionCode == null) {
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.1.6'
+    flutterVersionName = '1.1.7'
 }
 
 def args = ["-Xlint:deprecation", "-Xlint:unchecked", "-Werror"]
