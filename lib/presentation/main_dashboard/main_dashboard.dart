@@ -163,7 +163,7 @@ class _MainDashboardState extends State<MainDashboard>
   }
 
   void _startGyroBufferUploader() {
-    Timer.periodic(const Duration(seconds: 1), (_) async {
+    Timer.periodic(const Duration(seconds: 3), (_) async {
       if (_gyroBuffer.isEmpty) return;
 
       final db = await LocalDatabase.instance;
@@ -183,7 +183,7 @@ class _MainDashboardState extends State<MainDashboard>
   }
 
   void _startLocationBufferUploader() {
-    Timer.periodic(const Duration(seconds: 1), (_) async {
+    Timer.periodic(const Duration(seconds: 4), (_) async {
       if (_locationBuffer.isEmpty) return;
 
       final db = await LocalDatabase.instance;
@@ -223,7 +223,7 @@ class _MainDashboardState extends State<MainDashboard>
   }
 
   void _startMagnetometerBufferUploader() {
-    Timer.periodic(const Duration(seconds: 1), (_) async {
+    Timer.periodic(const Duration(seconds: 2), (_) async {
       if (_magnetometerBuffer.isEmpty) return;
 
       final db = await LocalDatabase.instance;
@@ -406,7 +406,7 @@ class _MainDashboardState extends State<MainDashboard>
   void _startUploadTimerLocation() {
     //return;
     //if (_uploadTimerLocation != null && _uploadTimerLocation!.isActive) return;
-    _uploadTimerLocation = Timer.periodic(const Duration(seconds: 2), (_) async {
+    _uploadTimerLocation = Timer.periodic(const Duration(seconds: 4), (_) async {
       //debugPrint("Таймер загрузки…");
 
       final allData = await LocalDatabase.fetchLocationBatch();
@@ -455,7 +455,7 @@ class _MainDashboardState extends State<MainDashboard>
   void _startUploadTimerAccelerometer() {
     //return;
     //if (_uploadTimerAccelerometer != null && _uploadTimerAccelerometer!.isActive) return;
-    _uploadTimerAccelerometer = Timer.periodic(const Duration(seconds: 3), (_) async {
+    _uploadTimerAccelerometer = Timer.periodic(const Duration(seconds: 1), (_) async {
       //debugPrint("Таймер загрузки…");
 
       final allData = await LocalDatabase.fetchAccelerometerBatch();
@@ -503,7 +503,7 @@ class _MainDashboardState extends State<MainDashboard>
 
   void _startUploadTimerGyroscope() {
     //if (_uploadTimerGyroscope != null && _uploadTimerGyroscope!.isActive) return;
-    _uploadTimerGyroscope = Timer.periodic(const Duration(seconds: 4), (_) async {
+    _uploadTimerGyroscope = Timer.periodic(const Duration(seconds: 3), (_) async {
       //debugPrint("Таймер загрузки…");
 
       final allData = await LocalDatabase.fetchGyroscopeBatch();
@@ -553,7 +553,7 @@ class _MainDashboardState extends State<MainDashboard>
   void _startUploadTimerMagnetometer() {
     //return;
     //if (_uploadTimerMagnetometer != null && _uploadTimerMagnetometer!.isActive) return;
-    _uploadTimerMagnetometer = Timer.periodic(const Duration(seconds: 5), (_) async {
+    _uploadTimerMagnetometer = Timer.periodic(const Duration(seconds: 2), (_) async {
       //debugPrint("Таймер загрузки…");
 
       final allData = await LocalDatabase.fetchMagnetometerBatch();
